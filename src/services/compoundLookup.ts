@@ -18,67 +18,339 @@ function normalizeFormula(formula: string): string {
 }
 
 /**
- * Fetch compound information from PubChem API
+ * Enhanced local database with more compounds
  */
-async function fetchFromPubChem(formula: string): Promise<ExternalCompoundInfo | null> {
+const enhancedLocalDatabase: Record<string, ExternalCompoundInfo> = {
+  // Aluminum compounds
+  'AL2(SO4)3': {
+    commonName: 'Aluminum Sulfate',
+    iupacName: 'Dialuminum Trisulfate',
+    synonyms: ['Aluminum Sulfate', 'Alum', 'Cake Alum', 'Dialuminum Trisulfate'],
+    category: 'Sulfate'
+  },
+  'AL2SO43': {
+    commonName: 'Aluminum Sulfate',
+    iupacName: 'Dialuminum Trisulfate',
+    synonyms: ['Aluminum Sulfate', 'Alum', 'Cake Alum'],
+    category: 'Sulfate'
+  },
+  'ALCL3': {
+    commonName: 'Aluminum Chloride',
+    iupacName: 'Aluminum Trichloride',
+    synonyms: ['Aluminum Chloride', 'Aluminum Trichloride'],
+    category: 'Salt'
+  },
+  'AL(OH)3': {
+    commonName: 'Aluminum Hydroxide',
+    iupacName: 'Aluminum Trihydroxide',
+    synonyms: ['Aluminum Hydroxide', 'Aluminum Trihydroxide', 'Alumina Trihydrate'],
+    category: 'Hydroxide'
+  },
+  'AL2O3': {
+    commonName: 'Aluminum Oxide',
+    iupacName: 'Dialuminum Trioxide',
+    synonyms: ['Aluminum Oxide', 'Alumina', 'Corundum'],
+    category: 'Oxide'
+  },
+
+  // Iron compounds
+  'FE2O3': {
+    commonName: 'Iron(III) Oxide',
+    iupacName: 'Diiron Trioxide',
+    synonyms: ['Iron(III) Oxide', 'Ferric Oxide', 'Rust', 'Hematite'],
+    category: 'Oxide'
+  },
+  'FEO': {
+    commonName: 'Iron(II) Oxide',
+    iupacName: 'Iron Oxide',
+    synonyms: ['Iron(II) Oxide', 'Ferrous Oxide', 'Wüstite'],
+    category: 'Oxide'
+  },
+  'FECL3': {
+    commonName: 'Iron(III) Chloride',
+    iupacName: 'Iron Trichloride',
+    synonyms: ['Iron(III) Chloride', 'Ferric Chloride'],
+    category: 'Salt'
+  },
+  'FECL2': {
+    commonName: 'Iron(II) Chloride',
+    iupacName: 'Iron Dichloride',
+    synonyms: ['Iron(II) Chloride', 'Ferrous Chloride'],
+    category: 'Salt'
+  },
+  'FESO4': {
+    commonName: 'Iron(II) Sulfate',
+    iupacName: 'Iron Sulfate',
+    synonyms: ['Iron(II) Sulfate', 'Ferrous Sulfate', 'Green Vitriol'],
+    category: 'Sulfate'
+  },
+
+  // Copper compounds
+  'CUSO4': {
+    commonName: 'Copper(II) Sulfate',
+    iupacName: 'Copper Sulfate',
+    synonyms: ['Copper(II) Sulfate', 'Copper Sulfate', 'Blue Vitriol', 'Cupric Sulfate'],
+    category: 'Sulfate'
+  },
+  'CUO': {
+    commonName: 'Copper(II) Oxide',
+    iupacName: 'Copper Oxide',
+    synonyms: ['Copper(II) Oxide', 'Cupric Oxide', 'Tenorite'],
+    category: 'Oxide'
+  },
+  'CU2O': {
+    commonName: 'Copper(I) Oxide',
+    iupacName: 'Dicopper Oxide',
+    synonyms: ['Copper(I) Oxide', 'Cuprous Oxide', 'Cuprite'],
+    category: 'Oxide'
+  },
+  'CUCL2': {
+    commonName: 'Copper(II) Chloride',
+    iupacName: 'Copper Dichloride',
+    synonyms: ['Copper(II) Chloride', 'Cupric Chloride'],
+    category: 'Salt'
+  },
+
+  // Zinc compounds
+  'ZNO': {
+    commonName: 'Zinc Oxide',
+    iupacName: 'Zinc Oxide',
+    synonyms: ['Zinc Oxide', 'Zinc White', 'Philosopher\'s Wool'],
+    category: 'Oxide'
+  },
+  'ZNCL2': {
+    commonName: 'Zinc Chloride',
+    iupacName: 'Zinc Dichloride',
+    synonyms: ['Zinc Chloride', 'Butter of Zinc'],
+    category: 'Salt'
+  },
+  'ZNSO4': {
+    commonName: 'Zinc Sulfate',
+    iupacName: 'Zinc Sulfate',
+    synonyms: ['Zinc Sulfate', 'White Vitriol', 'Goslarite'],
+    category: 'Sulfate'
+  },
+
+  // Magnesium compounds
+  'MGO': {
+    commonName: 'Magnesium Oxide',
+    iupacName: 'Magnesium Oxide',
+    synonyms: ['Magnesium Oxide', 'Magnesia', 'Periclase'],
+    category: 'Oxide'
+  },
+  'MG(OH)2': {
+    commonName: 'Magnesium Hydroxide',
+    iupacName: 'Magnesium Dihydroxide',
+    synonyms: ['Magnesium Hydroxide', 'Milk of Magnesia', 'Brucite'],
+    category: 'Hydroxide'
+  },
+  'MGCL2': {
+    commonName: 'Magnesium Chloride',
+    iupacName: 'Magnesium Dichloride',
+    synonyms: ['Magnesium Chloride', 'Bischofite'],
+    category: 'Salt'
+  },
+  'MGSO4': {
+    commonName: 'Magnesium Sulfate',
+    iupacName: 'Magnesium Sulfate',
+    synonyms: ['Magnesium Sulfate', 'Epsom Salt', 'Epsomite'],
+    category: 'Sulfate'
+  },
+
+  // Calcium compounds
+  'CAO': {
+    commonName: 'Calcium Oxide',
+    iupacName: 'Calcium Oxide',
+    synonyms: ['Calcium Oxide', 'Quicklime', 'Burnt Lime', 'Lime'],
+    category: 'Oxide'
+  },
+  'CA(OH)2': {
+    commonName: 'Calcium Hydroxide',
+    iupacName: 'Calcium Dihydroxide',
+    synonyms: ['Calcium Hydroxide', 'Slaked Lime', 'Hydrated Lime', 'Portlandite'],
+    category: 'Hydroxide'
+  },
+  'CACO3': {
+    commonName: 'Calcium Carbonate',
+    iupacName: 'Calcium Carbonate',
+    synonyms: ['Calcium Carbonate', 'Limestone', 'Chalk', 'Marble', 'Calcite'],
+    category: 'Carbonate'
+  },
+  'CASO4': {
+    commonName: 'Calcium Sulfate',
+    iupacName: 'Calcium Sulfate',
+    synonyms: ['Calcium Sulfate', 'Gypsum', 'Plaster of Paris', 'Anhydrite'],
+    category: 'Sulfate'
+  },
+  'CACL2': {
+    commonName: 'Calcium Chloride',
+    iupacName: 'Calcium Dichloride',
+    synonyms: ['Calcium Chloride', 'Road Salt'],
+    category: 'Salt'
+  },
+
+  // Sodium compounds
+  'NAOH': {
+    commonName: 'Sodium Hydroxide',
+    iupacName: 'Sodium Hydroxide',
+    synonyms: ['Sodium Hydroxide', 'Lye', 'Caustic Soda'],
+    category: 'Hydroxide'
+  },
+  'NACL': {
+    commonName: 'Sodium Chloride',
+    iupacName: 'Sodium Chloride',
+    synonyms: ['Sodium Chloride', 'Table Salt', 'Rock Salt', 'Halite'],
+    category: 'Salt'
+  },
+  'NA2CO3': {
+    commonName: 'Sodium Carbonate',
+    iupacName: 'Disodium Carbonate',
+    synonyms: ['Sodium Carbonate', 'Soda Ash', 'Washing Soda'],
+    category: 'Carbonate'
+  },
+  'NAHCO3': {
+    commonName: 'Sodium Bicarbonate',
+    iupacName: 'Sodium Hydrogen Carbonate',
+    synonyms: ['Sodium Bicarbonate', 'Baking Soda', 'Sodium Hydrogen Carbonate'],
+    category: 'Bicarbonate'
+  },
+  'NA2SO4': {
+    commonName: 'Sodium Sulfate',
+    iupacName: 'Disodium Sulfate',
+    synonyms: ['Sodium Sulfate', 'Glauber\'s Salt', 'Thenardite'],
+    category: 'Sulfate'
+  },
+
+  // Potassium compounds
+  'KOH': {
+    commonName: 'Potassium Hydroxide',
+    iupacName: 'Potassium Hydroxide',
+    synonyms: ['Potassium Hydroxide', 'Caustic Potash', 'Potash Lye'],
+    category: 'Hydroxide'
+  },
+  'KCL': {
+    commonName: 'Potassium Chloride',
+    iupacName: 'Potassium Chloride',
+    synonyms: ['Potassium Chloride', 'Muriate of Potash', 'Sylvite'],
+    category: 'Salt'
+  },
+  'K2CO3': {
+    commonName: 'Potassium Carbonate',
+    iupacName: 'Dipotassium Carbonate',
+    synonyms: ['Potassium Carbonate', 'Potash', 'Pearl Ash'],
+    category: 'Carbonate'
+  },
+  'KNO3': {
+    commonName: 'Potassium Nitrate',
+    iupacName: 'Potassium Nitrate',
+    synonyms: ['Potassium Nitrate', 'Saltpeter', 'Niter'],
+    category: 'Nitrate'
+  },
+
+  // Titanium compounds
+  'TIO2': {
+    commonName: 'Titanium Dioxide',
+    iupacName: 'Titanium Dioxide',
+    synonyms: ['Titanium Dioxide', 'Titania', 'Titanium White', 'Rutile', 'Anatase'],
+    category: 'Oxide'
+  },
+
+  // Silicon compounds
+  'SIO2': {
+    commonName: 'Silicon Dioxide',
+    iupacName: 'Silicon Dioxide',
+    synonyms: ['Silicon Dioxide', 'Silica', 'Quartz', 'Sand'],
+    category: 'Oxide'
+  },
+
+  // Lead compounds
+  'PBO': {
+    commonName: 'Lead(II) Oxide',
+    iupacName: 'Lead Oxide',
+    synonyms: ['Lead(II) Oxide', 'Lead Monoxide', 'Litharge'],
+    category: 'Oxide'
+  },
+  'PBO2': {
+    commonName: 'Lead(IV) Oxide',
+    iupacName: 'Lead Dioxide',
+    synonyms: ['Lead(IV) Oxide', 'Lead Dioxide', 'Plattnerite'],
+    category: 'Oxide'
+  },
+
+  // Tin compounds
+  'SNO': {
+    commonName: 'Tin(II) Oxide',
+    iupacName: 'Tin Oxide',
+    synonyms: ['Tin(II) Oxide', 'Stannous Oxide'],
+    category: 'Oxide'
+  },
+  'SNO2': {
+    commonName: 'Tin(IV) Oxide',
+    iupacName: 'Tin Dioxide',
+    synonyms: ['Tin(IV) Oxide', 'Tin Dioxide', 'Stannic Oxide', 'Cassiterite'],
+    category: 'Oxide'
+  },
+
+  // Barium compounds
+  'BACL2': {
+    commonName: 'Barium Chloride',
+    iupacName: 'Barium Dichloride',
+    synonyms: ['Barium Chloride'],
+    category: 'Salt'
+  },
+  'BASO4': {
+    commonName: 'Barium Sulfate',
+    iupacName: 'Barium Sulfate',
+    synonyms: ['Barium Sulfate', 'Barite', 'Barytes'],
+    category: 'Sulfate'
+  },
+
+  // Silver compounds
+  'AGNO3': {
+    commonName: 'Silver Nitrate',
+    iupacName: 'Silver Nitrate',
+    synonyms: ['Silver Nitrate', 'Lunar Caustic'],
+    category: 'Nitrate'
+  },
+  'AGCL': {
+    commonName: 'Silver Chloride',
+    iupacName: 'Silver Chloride',
+    synonyms: ['Silver Chloride', 'Horn Silver', 'Cerargyrite'],
+    category: 'Salt'
+  }
+};
+
+/**
+ * Try to fetch from a CORS proxy service as fallback
+ */
+async function fetchWithProxy(formula: string): Promise<ExternalCompoundInfo | null> {
   try {
-    // First, search for compounds by molecular formula
-    const searchUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/formula/${encodeURIComponent(formula)}/cids/JSON`;
-    const searchResponse = await fetch(searchUrl);
+    // Use a public CORS proxy service
+    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+    const pubchemUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/formula/${encodeURIComponent(formula)}/property/MolecularFormula,MolecularWeight,IUPACName/JSON`;
     
-    if (!searchResponse.ok) {
+    const response = await fetch(proxyUrl + encodeURIComponent(pubchemUrl));
+    
+    if (!response.ok) {
       return null;
     }
     
-    const searchData = await searchResponse.json();
-    const cids = searchData?.IdentifierList?.CID;
-    
-    if (!cids || cids.length === 0) {
-      return null;
-    }
-    
-    // Get the first compound ID (most relevant)
-    const cid = cids[0];
-    
-    // Fetch detailed information for the compound
-    const detailUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/MolecularFormula,MolecularWeight,IUPACName/JSON`;
-    const detailResponse = await fetch(detailUrl);
-    
-    if (!detailResponse.ok) {
-      return null;
-    }
-    
-    const detailData = await detailResponse.json();
-    const properties = detailData?.PropertyTable?.Properties?.[0];
+    const data = await response.json();
+    const properties = data?.PropertyTable?.Properties?.[0];
     
     if (!properties) {
       return null;
     }
     
-    // Fetch synonyms (common names)
-    const synonymUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/synonyms/JSON`;
-    const synonymResponse = await fetch(synonymUrl);
-    
-    let synonyms: string[] = [];
-    if (synonymResponse.ok) {
-      const synonymData = await synonymResponse.json();
-      synonyms = synonymData?.InformationList?.Information?.[0]?.Synonym || [];
-    }
-    
-    // Find the most common/recognizable name
-    const commonName = findBestCommonName(synonyms, formula);
-    
     return {
-      commonName,
       iupacName: properties.IUPACName,
-      synonyms: synonyms.slice(0, 10), // Limit to first 10 synonyms
       molecularFormula: properties.MolecularFormula,
       molecularWeight: properties.MolecularWeight,
-      category: categorizeCompound(formula, synonyms)
+      category: 'Chemical Compound'
     };
     
   } catch (error) {
-    console.warn('Error fetching from PubChem:', error);
+    console.warn('Proxy fetch failed:', error);
     return null;
   }
 }
@@ -166,13 +438,23 @@ export async function getCompoundInfo(formula: string): Promise<ExternalCompound
     return compoundCache.get(normalizedFormula) || null;
   }
   
-  // Fetch from external API
-  const info = await fetchFromPubChem(normalizedFormula);
+  // Check enhanced local database first
+  if (enhancedLocalDatabase[normalizedFormula]) {
+    const info = enhancedLocalDatabase[normalizedFormula];
+    compoundCache.set(normalizedFormula, info);
+    return info;
+  }
   
-  // Cache the result (including null results to avoid repeated failed requests)
-  compoundCache.set(normalizedFormula, info);
-  
-  return info;
+  // Try to fetch from external API with proxy (fallback)
+  try {
+    const info = await fetchWithProxy(normalizedFormula);
+    compoundCache.set(normalizedFormula, info);
+    return info;
+  } catch (error) {
+    console.warn('All compound lookup methods failed:', error);
+    compoundCache.set(normalizedFormula, null);
+    return null;
+  }
 }
 
 /**
