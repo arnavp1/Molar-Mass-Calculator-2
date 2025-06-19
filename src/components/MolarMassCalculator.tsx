@@ -1,39 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Beaker as Beaker2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Calculator, Beaker as Beaker2, Table } from 'lucide-react';
 import { parseFormula } from '../utils/formulaParser';
 import { calculateMolarMass, MolarMassResult } from '../utils/molarMassCalculator';
 import { ElementCard } from './ElementCard';
 import { DarkModeToggle } from './DarkModeToggle';
+import { CalculationHistory } from './CalculationHistory';
+import { PeriodicTable } from './PeriodicTable';
+import { UnitConverter } from './UnitConverter';
+import { EnhancedFormulaInput } from './EnhancedFormulaInput';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { useCalculationHistory } from '../hooks/useCalculationHistory';
 
 export function MolarMassCalculator() {
   const [formula, setFormula] = useState('');
   const [result, setResult] = useState<MolarMassResult | null>(null);
-  const [error, setError] = useState<string>('');
-  const [isValid, setIsValid] = useState(false);
+  const [parseResult, setParseResult] = useState({ elements: [], isValid: false });
+  const [isPeriodicTableOpen, setIsPeriodicTableOpen] = useState(false);
   const { isDark, toggleDarkMode } = useDarkMode();
+  const { history, addCalculation, removeEntry, clearHistory } = useCalculationHistory();
 
   useEffect(() => {
     if (!formula.trim()) {
       setResult(null);
-      setError('');
-      setIsValid(false);
+      setParseResult({ elements: [], isValid: false });
       return;
     }
 
-    const parseResult = parseFormula(formula);
+    const currentParseResult = parseFormula(formula);
+    setParseResult(currentParseResult);
     
-    if (parseResult.isValid) {
-      const molarMassResult = calculateMolarMass(parseResult.elements);
+    if (currentParseResult.isValid) {
+      const molarMassResult = calculateMolarMass(currentParseResult.elements);
       setResult(molarMassResult);
-      setError('');
-      setIsValid(true);
+      
+      // Add to history
+      addCalculation(formula, molarMassResult.totalMass);
     } else {
       setResult(null);
-      setError(parseResult.error || 'Invalid formula');
-      setIsValid(false);
     }
-  }, [formula]);
+  }, [formula, addCalculation]);
+
+  const handleElementSelect = (element: string) => {
+    setFormula(prev => prev + element);
+    setIsPeriodicTableOpen(false);
+  };
+
+  const handleHistorySelect = (selectedFormula: string) => {
+    setFormula(selectedFormula);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900 transition-colors duration-500">
@@ -57,53 +71,17 @@ export function MolarMassCalculator() {
 
         {/* Input Section */}
         <div className="max-w-2xl mx-auto mb-8">
-          <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
-            <label htmlFor="formula" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Molecular Formula
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                id="formula"
-                value={formula}
-                onChange={(e) => setFormula(e.target.value)}
-                placeholder="e.g., H2SO4, Ca(OH)2, C6H12O6"
-                className={`w-full px-4 py-3 text-lg border-2 rounded-xl focus:outline-none focus:ring-2 transition-all duration-200 dark:bg-gray-700/50 dark:text-white ${
-                  formula.trim() === '' 
-                    ? 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-200 dark:focus:ring-blue-400/30' 
-                    : isValid 
-                      ? 'border-green-400 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-400/30 bg-green-50 dark:bg-green-900/20' 
-                      : 'border-red-400 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-400/30 bg-red-50 dark:bg-red-900/20'
-                }`}
-              />
-              {formula.trim() !== '' && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  {isValid ? (
-                    <CheckCircle2 className="w-6 h-6 text-green-500" />
-                  ) : (
-                    <AlertCircle className="w-6 h-6 text-red-500" />
-                  )}
-                </div>
-              )}
-            </div>
-            
-            {error && (
-              <div className="mt-3 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg flex items-center">
-                <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
-                <span className="text-red-700 dark:text-red-300">{error}</span>
-              </div>
-            )}
-
-            <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
-              <p><strong>Examples:</strong> H2O, NaCl, C6H12O6, Ca(OH)2, Al2(SO4)3</p>
-              <p><strong>Tips:</strong> Use proper capitalization (H2O not h2o), parentheses for polyatomic ions</p>
-            </div>
-          </div>
+          <EnhancedFormulaInput
+            formula={formula}
+            onFormulaChange={setFormula}
+            parseResult={parseResult}
+            onOpenPeriodicTable={() => setIsPeriodicTableOpen(true)}
+          />
         </div>
 
         {/* Results Section */}
         {result && (
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto mb-8">
             {/* Total Molar Mass */}
             <div className="bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 rounded-2xl p-8 mb-8 text-white shadow-2xl">
               <div className="flex items-center justify-center mb-4">
@@ -130,28 +108,43 @@ export function MolarMassCalculator() {
               </div>
             </div>
 
-            {/* Calculation Summary */}
-            <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
-              <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Calculation Summary</h3>
-              <div className="space-y-2">
-                {result.breakdown.map((element) => (
-                  <div key={element.element} className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      {element.element} ({element.elementName})
-                    </span>
-                    <span className="font-mono text-sm text-gray-600 dark:text-gray-400">
-                      {element.atomicMass} × {element.count} = {element.subtotal.toFixed(2)} g/mol
-                    </span>
+            {/* Unit Converter and Calculation Summary */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <UnitConverter molarMass={result.totalMass} formula={formula} />
+              
+              {/* Calculation Summary */}
+              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+                <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Calculation Summary</h3>
+                <div className="space-y-2">
+                  {result.breakdown.map((element) => (
+                    <div key={element.element} className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600 last:border-b-0">
+                      <span className="font-medium text-gray-800 dark:text-gray-200">
+                        {element.element} ({element.elementName})
+                      </span>
+                      <span className="font-mono text-sm text-gray-600 dark:text-gray-400">
+                        {element.atomicMass} × {element.count} = {element.subtotal.toFixed(2)} g/mol
+                      </span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between items-center py-3 border-t-2 border-gray-300 dark:border-gray-600 font-bold text-lg">
+                    <span className="text-gray-800 dark:text-gray-200">Total Molar Mass:</span>
+                    <span className="text-green-600 dark:text-green-400">{result.totalMass} g/mol</span>
                   </div>
-                ))}
-                <div className="flex justify-between items-center py-3 border-t-2 border-gray-300 dark:border-gray-600 font-bold text-lg">
-                  <span className="text-gray-800 dark:text-gray-200">Total Molar Mass:</span>
-                  <span className="text-green-600 dark:text-green-400">{result.totalMass} g/mol</span>
                 </div>
               </div>
             </div>
           </div>
         )}
+
+        {/* Calculation History */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <CalculationHistory
+            history={history}
+            onSelectFormula={handleHistorySelect}
+            onClearHistory={clearHistory}
+            onRemoveEntry={removeEntry}
+          />
+        </div>
 
         {/* Instructions for empty state */}
         {!formula.trim() && (
@@ -159,13 +152,27 @@ export function MolarMassCalculator() {
             <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 dark:border-gray-700/20">
               <Beaker2 className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-3">Ready to Calculate</h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
                 Enter a molecular formula above to see its molar mass calculation with detailed breakdown.
               </p>
+              <button
+                onClick={() => setIsPeriodicTableOpen(true)}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Table className="w-4 h-4 mr-2" />
+                Open Periodic Table
+              </button>
             </div>
           </div>
         )}
       </div>
+
+      {/* Periodic Table Modal */}
+      <PeriodicTable
+        isOpen={isPeriodicTableOpen}
+        onClose={() => setIsPeriodicTableOpen(false)}
+        onElementSelect={handleElementSelect}
+      />
 
       <style jsx>{`
         @keyframes fadeInUp {

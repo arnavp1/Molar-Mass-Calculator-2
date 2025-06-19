@@ -9,6 +9,7 @@ export interface ParseResult {
   elements: ElementCount[];
   isValid: boolean;
   error?: string;
+  errorPosition?: number;
 }
 
 export function parseFormula(formula: string): ParseResult {
@@ -25,10 +26,13 @@ export function parseFormula(formula: string): ParseResult {
   
   // Check for invalid characters - allow letters, numbers, and parentheses
   if (!/^[A-Za-z0-9()]+$/.test(cleanFormula)) {
+    const invalidCharMatch = cleanFormula.match(/[^A-Za-z0-9()]/);
+    const errorPosition = invalidCharMatch ? cleanFormula.indexOf(invalidCharMatch[0]) : 0;
     return {
       elements: [],
       isValid: false,
-      error: 'Invalid characters in formula. Use only element symbols, numbers, and parentheses.'
+      error: `Invalid character '${invalidCharMatch?.[0]}' at position ${errorPosition + 1}`,
+      errorPosition
     };
   }
 
@@ -37,7 +41,8 @@ export function parseFormula(formula: string): ParseResult {
     return {
       elements: [],
       isValid: false,
-      error: 'Formula must start with an element symbol (uppercase letter).'
+      error: 'Formula must start with an element symbol (uppercase letter)',
+      errorPosition: 0
     };
   }
 
@@ -47,10 +52,12 @@ export function parseFormula(formula: string): ParseResult {
     // Validate that all elements exist in our atomic masses database
     for (const { element } of elements) {
       if (!atomicMasses[element]) {
+        const elementPosition = cleanFormula.indexOf(element);
         return {
           elements: [],
           isValid: false,
-          error: `Unknown element: ${element}`
+          error: `Unknown element: ${element}`,
+          errorPosition: elementPosition
         };
       }
     }
@@ -63,10 +70,15 @@ export function parseFormula(formula: string): ParseResult {
       isValid: true
     };
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Invalid formula format';
+    const positionMatch = errorMessage.match(/position (\d+)/);
+    const errorPosition = positionMatch ? parseInt(positionMatch[1]) - 1 : undefined;
+    
     return {
       elements: [],
       isValid: false,
-      error: error instanceof Error ? error.message : 'Invalid formula format'
+      error: errorMessage,
+      errorPosition
     };
   }
 }
@@ -87,7 +99,7 @@ function parseRecursive(formula: string, multiplier: number = 1): ElementCount[]
       }
 
       if (depth > 0) {
-        throw new Error('Unmatched opening parenthesis');
+        throw new Error(`Unmatched opening parenthesis at position ${i + 1}`);
       }
 
       // Extract content inside parentheses
@@ -124,7 +136,7 @@ function parseRecursive(formula: string, multiplier: number = 1): ElementCount[]
       
       i += numberMatch ? numberMatch[1].length : 0;
     } else {
-      throw new Error(`Unexpected character: ${formula[i]} at position ${i + 1}`);
+      throw new Error(`Unexpected character '${formula[i]}' at position ${i + 1}`);
     }
   }
 
