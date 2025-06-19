@@ -30,6 +30,7 @@ export function MolarMassCalculator() {
       setParseResult({ elements: [], isValid: false });
       setCompoundInfo(null);
       setCompoundInfoError(undefined);
+      setIsLoadingCompoundInfo(false);
       return;
     }
 
@@ -43,12 +44,17 @@ export function MolarMassCalculator() {
       // Add to history
       addCalculation(formula, molarMassResult.totalMass);
 
-      // Fetch compound information from PubChem
-      fetchCompoundInfo(formula);
+      // Fetch compound information from PubChem with debouncing
+      const timeoutId = setTimeout(() => {
+        fetchCompoundInfo(formula);
+      }, 500); // 500ms delay to avoid too many API calls
+
+      return () => clearTimeout(timeoutId);
     } else {
       setResult(null);
       setCompoundInfo(null);
       setCompoundInfoError(undefined);
+      setIsLoadingCompoundInfo(false);
     }
   }, [formula, addCalculation]);
 
@@ -58,17 +64,25 @@ export function MolarMassCalculator() {
     
     try {
       const info = await pubchemService.getCompoundInfo(formulaToFetch);
-      setCompoundInfo(info);
       
-      if (!info) {
-        setCompoundInfoError('No compound information found in PubChem database');
+      // Only update if this is still the current formula
+      if (formulaToFetch === formula) {
+        setCompoundInfo(info);
+        
+        if (!info) {
+          setCompoundInfoError('No compound information found in PubChem database');
+        }
       }
     } catch (error) {
       console.error('Error fetching compound info:', error);
-      setCompoundInfoError('Failed to fetch compound information');
-      setCompoundInfo(null);
+      if (formulaToFetch === formula) {
+        setCompoundInfoError('Failed to fetch compound information. Please check your internet connection.');
+        setCompoundInfo(null);
+      }
     } finally {
-      setIsLoadingCompoundInfo(false);
+      if (formulaToFetch === formula) {
+        setIsLoadingCompoundInfo(false);
+      }
     }
   };
 

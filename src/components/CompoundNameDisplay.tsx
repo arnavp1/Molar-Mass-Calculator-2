@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Beaker, Tag, Loader2, ExternalLink } from 'lucide-react';
+import { BookOpen, Beaker, Tag, Loader2, ExternalLink, AlertCircle } from 'lucide-react';
 import { PubChemCompoundInfo } from '../services/pubchemService';
 
 interface CompoundNameDisplayProps {
@@ -15,7 +15,10 @@ export function CompoundNameDisplay({ compoundInfo, formula, isLoading, error }:
       <div className="bg-gradient-to-r from-indigo-500 to-purple-600 dark:from-indigo-600 dark:to-purple-700 rounded-2xl p-6 mb-8 text-white shadow-2xl">
         <div className="flex items-center justify-center">
           <Loader2 className="w-6 h-6 mr-3 animate-spin" />
-          <span className="text-lg">Looking up compound names...</span>
+          <span className="text-lg">Looking up compound names from PubChem...</span>
+        </div>
+        <div className="text-center mt-2 text-indigo-200 text-sm">
+          This may take a few seconds for the first lookup
         </div>
       </div>
     );
@@ -25,12 +28,15 @@ export function CompoundNameDisplay({ compoundInfo, formula, isLoading, error }:
     return (
       <div className="bg-gradient-to-r from-red-500 to-red-600 dark:from-red-600 dark:to-red-700 rounded-2xl p-6 mb-8 text-white shadow-2xl">
         <div className="flex items-center justify-center mb-2">
-          <BookOpen className="w-6 h-6 mr-3" />
+          <AlertCircle className="w-6 h-6 mr-3" />
           <h2 className="text-xl font-bold">Compound Names</h2>
         </div>
         <div className="text-center">
           <div className="text-red-100 mb-2">Formula: {formula}</div>
           <div className="text-red-200">{error}</div>
+          <div className="text-red-300 text-sm mt-2">
+            Try checking your internet connection or try again later
+          </div>
         </div>
       </div>
     );
@@ -53,7 +59,7 @@ export function CompoundNameDisplay({ compoundInfo, formula, isLoading, error }:
             No naming information found in PubChem database for this compound.
           </div>
           <div className="text-sm text-gray-300 mt-2">
-            This may be a theoretical compound or one not yet catalogued.
+            This may be a theoretical compound or one not yet catalogued in PubChem.
           </div>
         </div>
       </div>
@@ -78,7 +84,7 @@ export function CompoundNameDisplay({ compoundInfo, formula, isLoading, error }:
               rel="noopener noreferrer"
               className="ml-2 inline-flex items-center text-yellow-300 hover:text-yellow-200 transition-colors"
             >
-              <ExternalLink className="w-3 h-3 ml-1" />
+              View on PubChem <ExternalLink className="w-3 h-3 ml-1" />
             </a>
           </div>
         )}

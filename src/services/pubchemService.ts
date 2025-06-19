@@ -6,7 +6,6 @@ export interface PubChemCompoundInfo {
 }
 
 class PubChemService {
-  private baseUrl = 'https://pubchem.ncbi.nlm.nih.gov/rest/pug';
   private cache = new Map<string, PubChemCompoundInfo>();
 
   async getCompoundInfo(formula: string): Promise<PubChemCompoundInfo | null> {
@@ -49,12 +48,19 @@ class PubChemService {
 
   private async getCIDFromFormula(formula: string): Promise<number | null> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/compound/fastformula/${encodeURIComponent(formula)}/cids/JSON`
-      );
+      // Use a CORS proxy to access PubChem API
+      const proxyUrl = 'https://api.allorigins.win/raw?url=';
+      const targetUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/fastformula/${encodeURIComponent(formula)}/cids/JSON`;
+      
+      const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
       
       if (!response.ok) {
-        return null;
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -73,12 +79,18 @@ class PubChemService {
 
   private async getSynonyms(cid: number): Promise<string[]> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/compound/cid/${cid}/synonyms/JSON`
-      );
+      const proxyUrl = 'https://api.allorigins.win/raw?url=';
+      const targetUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/synonyms/JSON`;
+      
+      const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
       
       if (!response.ok) {
-        return [];
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -96,12 +108,18 @@ class PubChemService {
 
   private async getIUPACName(cid: number): Promise<string | undefined> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/compound/cid/${cid}/property/IUPACName/JSON`
-      );
+      const proxyUrl = 'https://api.allorigins.win/raw?url=';
+      const targetUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/IUPACName/JSON`;
+      
+      const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
       
       if (!response.ok) {
-        return undefined;
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -151,7 +169,24 @@ class PubChemService {
       /^carbon dioxide$/i,
       /^carbon monoxide$/i,
       /^hydrogen peroxide$/i,
-      /^ozone$/i
+      /^ozone$/i,
+      /^caffeine$/i,
+      /^aspirin$/i,
+      /^ibuprofen$/i,
+      /^penicillin$/i,
+      /^insulin$/i,
+      /^morphine$/i,
+      /^nicotine$/i,
+      /^cocaine$/i,
+      /^heroin$/i,
+      /^lsd$/i,
+      /^thc$/i,
+      /^dna$/i,
+      /^rna$/i,
+      /^atp$/i,
+      /^adp$/i,
+      /^nadh$/i,
+      /^fad$/i
     ];
 
     // First, try to find exact matches with common name patterns
@@ -175,6 +210,9 @@ class PubChemService {
       
       // Skip names with multiple parentheses or brackets
       if ((synonym.match(/[()[\]]/g) || []).length > 2) return false;
+      
+      // Skip names that are mostly uppercase (likely abbreviations)
+      if (synonym === synonym.toUpperCase() && synonym.length > 3) return false;
       
       return true;
     });
