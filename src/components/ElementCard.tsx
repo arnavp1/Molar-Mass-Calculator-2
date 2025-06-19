@@ -2,14 +2,16 @@ import React from 'react';
 import { Info } from 'lucide-react';
 import { ElementCalculation } from '../utils/molarMassCalculator';
 import { getElementDetails } from '../data/elementDetails';
+import { ThemeSettings } from '../hooks/useThemeSettings';
 
 interface ElementCardProps {
   element: ElementCalculation;
   index: number;
   onShowDetails?: (symbol: string) => void;
+  settings: ThemeSettings;
 }
 
-export function ElementCard({ element, index, onShowDetails }: ElementCardProps) {
+export function ElementCard({ element, index, onShowDetails, settings }: ElementCardProps) {
   const hasDetails = getElementDetails(element.element) !== null;
 
   return (
@@ -22,7 +24,7 @@ export function ElementCard({ element, index, onShowDetails }: ElementCardProps)
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
+          <div className={`w-12 h-12 bg-gradient-to-br from-${settings.primaryColor}-500 to-${settings.secondaryColor}-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
             {element.element}
           </div>
           <div>
@@ -32,12 +34,12 @@ export function ElementCard({ element, index, onShowDetails }: ElementCardProps)
         </div>
         <div className="flex items-center space-x-2">
           <div className="text-right">
-            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">×{element.count}</div>
+            <div className={`text-2xl font-bold text-${settings.secondaryColor}-600 dark:text-${settings.secondaryColor}-400`}>×{element.count}</div>
           </div>
           {hasDetails && onShowDetails && (
             <button
               onClick={() => onShowDetails(element.element)}
-              className="p-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              className={`p-1 text-${settings.primaryColor}-600 dark:text-${settings.primaryColor}-400 hover:text-${settings.primaryColor}-700 dark:hover:text-${settings.primaryColor}-300 transition-colors`}
               title="View detailed element information"
             >
               <Info className="w-5 h-5" />
@@ -54,7 +56,7 @@ export function ElementCard({ element, index, onShowDetails }: ElementCardProps)
           </span>
         </div>
         <div className="mt-2 text-right">
-          <span className="text-lg font-bold text-green-600 dark:text-green-400">
+          <span className={`text-lg font-bold text-${settings.primaryColor}-600 dark:text-${settings.primaryColor}-400`}>
             {element.subtotal.toFixed(2)} g/mol
           </span>
         </div>

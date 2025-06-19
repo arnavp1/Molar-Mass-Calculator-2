@@ -4,6 +4,8 @@ import { Settings, X, Palette, Monitor, Sun, Moon } from 'lucide-react';
 export interface ThemeSettings {
   mode: 'light' | 'dark' | 'system';
   gradient: string;
+  primaryColor: string;
+  secondaryColor: string;
 }
 
 interface SettingsPanelProps {
@@ -17,42 +19,58 @@ const gradientOptions = [
   {
     name: 'Ocean Blue',
     value: 'from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900',
-    preview: 'bg-gradient-to-br from-blue-400 to-purple-500'
+    preview: 'bg-gradient-to-br from-blue-400 to-purple-500',
+    primaryColor: 'blue',
+    secondaryColor: 'purple'
   },
   {
     name: 'Forest Green',
     value: 'from-green-50 via-emerald-50 to-teal-50 dark:from-gray-900 dark:via-green-900 dark:to-teal-900',
-    preview: 'bg-gradient-to-br from-green-400 to-teal-500'
+    preview: 'bg-gradient-to-br from-green-400 to-teal-500',
+    primaryColor: 'green',
+    secondaryColor: 'teal'
   },
   {
     name: 'Sunset Orange',
     value: 'from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:via-orange-900 dark:to-red-900',
-    preview: 'bg-gradient-to-br from-orange-400 to-red-500'
+    preview: 'bg-gradient-to-br from-orange-400 to-red-500',
+    primaryColor: 'orange',
+    secondaryColor: 'red'
   },
   {
     name: 'Purple Dream',
     value: 'from-purple-50 via-pink-50 to-rose-50 dark:from-gray-900 dark:via-purple-900 dark:to-pink-900',
-    preview: 'bg-gradient-to-br from-purple-400 to-pink-500'
+    preview: 'bg-gradient-to-br from-purple-400 to-pink-500',
+    primaryColor: 'purple',
+    secondaryColor: 'pink'
   },
   {
     name: 'Cosmic Dark',
     value: 'from-slate-50 via-gray-50 to-zinc-50 dark:from-slate-900 dark:via-gray-900 dark:to-zinc-900',
-    preview: 'bg-gradient-to-br from-slate-400 to-zinc-500'
+    preview: 'bg-gradient-to-br from-slate-400 to-zinc-500',
+    primaryColor: 'slate',
+    secondaryColor: 'zinc'
   },
   {
     name: 'Golden Hour',
     value: 'from-yellow-50 via-orange-50 to-amber-50 dark:from-gray-900 dark:via-yellow-900 dark:to-orange-900',
-    preview: 'bg-gradient-to-br from-yellow-400 to-orange-500'
+    preview: 'bg-gradient-to-br from-yellow-400 to-orange-500',
+    primaryColor: 'yellow',
+    secondaryColor: 'orange'
   },
   {
     name: 'Arctic Ice',
     value: 'from-cyan-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-cyan-900 dark:to-blue-900',
-    preview: 'bg-gradient-to-br from-cyan-400 to-blue-500'
+    preview: 'bg-gradient-to-br from-cyan-400 to-blue-500',
+    primaryColor: 'cyan',
+    secondaryColor: 'blue'
   },
   {
     name: 'Cherry Blossom',
     value: 'from-pink-50 via-rose-50 to-red-50 dark:from-gray-900 dark:via-pink-900 dark:to-rose-900',
-    preview: 'bg-gradient-to-br from-pink-400 to-rose-500'
+    preview: 'bg-gradient-to-br from-pink-400 to-rose-500',
+    primaryColor: 'pink',
+    secondaryColor: 'rose'
   }
 ];
 
@@ -71,8 +89,8 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
     onSettingsChange({ ...settings, mode });
   };
 
-  const handleGradientChange = (gradient: string) => {
-    onSettingsChange({ ...settings, gradient });
+  const handleGradientChange = (gradient: string, primaryColor: string, secondaryColor: string) => {
+    onSettingsChange({ ...settings, gradient, primaryColor, secondaryColor });
   };
 
   return (
@@ -101,7 +119,7 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
             onClick={() => setActiveTab('theme')}
             className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
               activeTab === 'theme'
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                ? `text-${settings.primaryColor}-600 dark:text-${settings.primaryColor}-400 border-b-2 border-${settings.primaryColor}-600 dark:border-${settings.primaryColor}-400 bg-${settings.primaryColor}-50 dark:bg-${settings.primaryColor}-900/20`
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
@@ -112,7 +130,7 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
             onClick={() => setActiveTab('colors')}
             className={`flex-1 px-6 py-3 text-sm font-medium transition-colors ${
               activeTab === 'colors'
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                ? `text-${settings.primaryColor}-600 dark:text-${settings.primaryColor}-400 border-b-2 border-${settings.primaryColor}-600 dark:border-${settings.primaryColor}-400 bg-${settings.primaryColor}-50 dark:bg-${settings.primaryColor}-900/20`
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
@@ -134,7 +152,7 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
                     onClick={() => handleThemeModeChange('light')}
                     className={`flex items-center p-4 rounded-lg border-2 transition-all ${
                       settings.mode === 'light'
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        ? `border-${settings.primaryColor}-500 bg-${settings.primaryColor}-50 dark:bg-${settings.primaryColor}-900/20`
                         : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                     }`}
                   >
@@ -151,11 +169,11 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
                     onClick={() => handleThemeModeChange('dark')}
                     className={`flex items-center p-4 rounded-lg border-2 transition-all ${
                       settings.mode === 'dark'
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        ? `border-${settings.primaryColor}-500 bg-${settings.primaryColor}-50 dark:bg-${settings.primaryColor}-900/20`
                         : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                     }`}
                   >
-                    <Moon className="w-5 h-5 text-blue-400 mr-3" />
+                    <Moon className={`w-5 h-5 text-${settings.primaryColor}-400 mr-3`} />
                     <div className="text-left">
                       <div className="font-medium text-gray-800 dark:text-gray-200">Dark Mode</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -168,7 +186,7 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
                     onClick={() => handleThemeModeChange('system')}
                     className={`flex items-center p-4 rounded-lg border-2 transition-all ${
                       settings.mode === 'system'
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        ? `border-${settings.primaryColor}-500 bg-${settings.primaryColor}-50 dark:bg-${settings.primaryColor}-900/20`
                         : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                     }`}
                   >
@@ -196,10 +214,10 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
                   {gradientOptions.map((option) => (
                     <button
                       key={option.name}
-                      onClick={() => handleGradientChange(option.value)}
+                      onClick={() => handleGradientChange(option.value, option.primaryColor, option.secondaryColor)}
                       className={`flex items-center p-3 rounded-lg border-2 transition-all ${
                         settings.gradient === option.value
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          ? `border-${settings.primaryColor}-500 bg-${settings.primaryColor}-50 dark:bg-${settings.primaryColor}-900/20`
                           : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                       }`}
                     >
@@ -222,13 +240,13 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
                 <div className={`p-6 rounded-lg bg-gradient-to-br ${settings.gradient} border border-gray-200 dark:border-gray-600`}>
                   <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/20 dark:border-gray-700/20">
                     <div className="flex items-center mb-3">
-                      <div className="w-8 h-8 bg-blue-500 rounded-full mr-3"></div>
+                      <div className={`w-8 h-8 bg-gradient-to-br from-${settings.primaryColor}-500 to-${settings.secondaryColor}-600 rounded-full mr-3`}></div>
                       <div>
                         <div className="font-semibold text-gray-800 dark:text-gray-200">Sample Element</div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">Preview of your theme</div>
                       </div>
                     </div>
-                    <div className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm inline-block">
+                    <div className={`px-3 py-1 bg-${settings.primaryColor}-100 dark:bg-${settings.primaryColor}-900/30 text-${settings.primaryColor}-700 dark:text-${settings.primaryColor}-300 rounded-full text-sm inline-block`}>
                       Sample Badge
                     </div>
                   </div>
@@ -242,7 +260,7 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
         <div className="flex justify-end p-6 border-t border-gray-200 dark:border-gray-700">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className={`px-6 py-2 bg-${settings.primaryColor}-600 text-white rounded-lg hover:bg-${settings.primaryColor}-700 transition-colors`}
           >
             Done
           </button>

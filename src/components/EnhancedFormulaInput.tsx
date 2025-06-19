@@ -1,19 +1,22 @@
 import React from 'react';
 import { AlertCircle, CheckCircle2, Table } from 'lucide-react';
 import { ParseResult } from '../utils/formulaParser';
+import { ThemeSettings } from '../hooks/useThemeSettings';
 
 interface EnhancedFormulaInputProps {
   formula: string;
   onFormulaChange: (formula: string) => void;
   parseResult: ParseResult;
   onOpenPeriodicTable: () => void;
+  settings: ThemeSettings;
 }
 
 export function EnhancedFormulaInput({ 
   formula, 
   onFormulaChange, 
   parseResult,
-  onOpenPeriodicTable 
+  onOpenPeriodicTable,
+  settings 
 }: EnhancedFormulaInputProps) {
   const { isValid, error, errorPosition } = parseResult;
 
@@ -53,14 +56,14 @@ export function EnhancedFormulaInput({
             formula.trim() === '' 
               ? 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-200 dark:focus:ring-blue-400/30' 
               : isValid 
-                ? 'border-green-400 focus:border-green-500 focus:ring-green-200 dark:focus:ring-green-400/30 bg-green-50 dark:bg-green-900/20' 
+                ? `border-${settings.primaryColor}-400 focus:border-${settings.primaryColor}-500 focus:ring-${settings.primaryColor}-200 dark:focus:ring-${settings.primaryColor}-400/30 bg-${settings.primaryColor}-50 dark:bg-${settings.primaryColor}-900/20` 
                 : 'border-red-400 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-400/30 bg-red-50 dark:bg-red-900/20'
           }`}
         />
         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
           <button
             onClick={onOpenPeriodicTable}
-            className="p-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+            className={`p-1 text-${settings.primaryColor}-600 dark:text-${settings.primaryColor}-400 hover:text-${settings.primaryColor}-700 dark:hover:text-${settings.primaryColor}-300 transition-colors`}
             title="Open Periodic Table"
           >
             <Table className="w-5 h-5" />
@@ -68,7 +71,7 @@ export function EnhancedFormulaInput({
           {formula.trim() !== '' && (
             <div>
               {isValid ? (
-                <CheckCircle2 className="w-6 h-6 text-green-500" />
+                <CheckCircle2 className={`w-6 h-6 text-${settings.primaryColor}-500`} />
               ) : (
                 <AlertCircle className="w-6 h-6 text-red-500" />
               )}

@@ -91,11 +91,11 @@ export function MolarMassCalculator() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-full shadow-lg">
+            <div className={`bg-gradient-to-r from-${settings.primaryColor}-600 to-${settings.secondaryColor}-600 p-3 rounded-full shadow-lg`}>
               <Beaker2 className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          <h1 className={`text-4xl font-bold bg-gradient-to-r from-${settings.primaryColor}-600 to-${settings.secondaryColor}-600 bg-clip-text text-transparent mb-2`}>
             Molecular Mass Calculator
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -110,6 +110,7 @@ export function MolarMassCalculator() {
             onFormulaChange={setFormula}
             parseResult={parseResult}
             onOpenPeriodicTable={() => setIsPeriodicTableOpen(true)}
+            settings={settings}
           />
         </div>
 
@@ -117,7 +118,7 @@ export function MolarMassCalculator() {
         {result && (
           <div className="max-w-6xl mx-auto mb-8">
             {/* Total Molar Mass */}
-            <div className="bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 rounded-2xl p-8 mb-8 text-white shadow-2xl">
+            <div className={`bg-gradient-to-r from-${settings.primaryColor}-500 to-${settings.secondaryColor}-600 dark:from-${settings.primaryColor}-600 dark:to-${settings.secondaryColor}-700 rounded-2xl p-8 mb-8 text-white shadow-2xl`}>
               <div className="flex items-center justify-center mb-4">
                 <Calculator className="w-12 h-12 mr-4" />
                 <div className="text-center">
@@ -125,7 +126,7 @@ export function MolarMassCalculator() {
                   <div className="text-5xl font-bold">
                     {result.totalMass} <span className="text-2xl">g/mol</span>
                   </div>
-                  <p className="text-green-100 mt-2">Formula: {formula}</p>
+                  <p className={`text-${settings.primaryColor}-100 mt-2`}>Formula: {formula}</p>
                 </div>
               </div>
             </div>
@@ -142,6 +143,7 @@ export function MolarMassCalculator() {
                     element={element} 
                     index={index}
                     onShowDetails={handleShowElementDetails}
+                    settings={settings}
                   />
                 ))}
               </div>
@@ -165,20 +167,21 @@ export function MolarMassCalculator() {
                   ))}
                   <div className="flex justify-between items-center py-3 border-t-2 border-gray-300 dark:border-gray-600 font-bold text-lg">
                     <span className="text-gray-800 dark:text-gray-200">Total Molar Mass:</span>
-                    <span className="text-green-600 dark:text-green-400">{result.totalMass} g/mol</span>
+                    <span className={`text-${settings.primaryColor}-600 dark:text-${settings.primaryColor}-400`}>{result.totalMass} g/mol</span>
                   </div>
                 </div>
               </div>
 
               {/* Unit Converter and Calculation History Side by Side */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <UnitConverter molarMass={result.totalMass} formula={formula} />
+                <UnitConverter molarMass={result.totalMass} formula={formula} settings={settings} />
                 
                 <CalculationHistory
                   history={history}
                   onSelectFormula={handleHistorySelect}
                   onClearHistory={clearHistory}
                   onRemoveEntry={removeEntry}
+                  settings={settings}
                 />
               </div>
             </div>
@@ -198,7 +201,7 @@ export function MolarMassCalculator() {
                 </p>
                 <button
                   onClick={() => setIsPeriodicTableOpen(true)}
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className={`inline-flex items-center px-4 py-2 bg-${settings.primaryColor}-600 text-white rounded-lg hover:bg-${settings.primaryColor}-700 transition-colors`}
                 >
                   <Table className="w-4 h-4 mr-2" />
                   Open Periodic Table
@@ -213,6 +216,7 @@ export function MolarMassCalculator() {
                 onSelectFormula={handleHistorySelect}
                 onClearHistory={clearHistory}
                 onRemoveEntry={removeEntry}
+                settings={settings}
               />
             </div>
           </>

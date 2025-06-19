@@ -1,5 +1,6 @@
 import React from 'react';
 import { History, X, Calculator } from 'lucide-react';
+import { ThemeSettings } from '../hooks/useThemeSettings';
 
 export interface HistoryEntry {
   id: string;
@@ -13,13 +14,15 @@ interface CalculationHistoryProps {
   onSelectFormula: (formula: string) => void;
   onClearHistory: () => void;
   onRemoveEntry: (id: string) => void;
+  settings: ThemeSettings;
 }
 
 export function CalculationHistory({ 
   history, 
   onSelectFormula, 
   onClearHistory, 
-  onRemoveEntry 
+  onRemoveEntry,
+  settings 
 }: CalculationHistoryProps) {
   if (history.length === 0) {
     return (
@@ -58,7 +61,7 @@ export function CalculationHistory({
             onClick={() => onSelectFormula(entry.formula)}
           >
             <div className="flex items-center space-x-3">
-              <Calculator className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <Calculator className={`w-4 h-4 text-${settings.primaryColor}-600 dark:text-${settings.primaryColor}-400`} />
               <div>
                 <div className="font-mono text-sm font-medium text-gray-800 dark:text-gray-200">
                   {entry.formula}

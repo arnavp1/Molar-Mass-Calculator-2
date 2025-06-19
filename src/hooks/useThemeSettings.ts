@@ -3,11 +3,15 @@ import { useState, useEffect } from 'react';
 export interface ThemeSettings {
   mode: 'light' | 'dark' | 'system';
   gradient: string;
+  primaryColor: string;
+  secondaryColor: string;
 }
 
 const defaultSettings: ThemeSettings = {
   mode: 'system',
-  gradient: 'from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900'
+  gradient: 'from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900',
+  primaryColor: 'blue',
+  secondaryColor: 'purple'
 };
 
 export function useThemeSettings() {
