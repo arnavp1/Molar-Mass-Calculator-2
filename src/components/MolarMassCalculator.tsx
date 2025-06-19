@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calculator, Beaker as Beaker2, Table } from 'lucide-react';
+import { Calculator, Beaker as Beaker2, Table, Settings } from 'lucide-react';
 import { parseFormula } from '../utils/formulaParser';
 import { calculateMolarMass, MolarMassResult } from '../utils/molarMassCalculator';
 import { getElementDetails } from '../data/elementDetails';
@@ -10,7 +10,8 @@ import { PeriodicTable } from './PeriodicTable';
 import { UnitConverter } from './UnitConverter';
 import { EnhancedFormulaInput } from './EnhancedFormulaInput';
 import { ElementDetailsModal } from './ElementDetailsModal';
-import { useDarkMode } from '../hooks/useDarkMode';
+import { SettingsPanel } from './SettingsPanel';
+import { useThemeSettings } from '../hooks/useThemeSettings';
 import { useCalculationHistory } from '../hooks/useCalculationHistory';
 
 export function MolarMassCalculator() {
@@ -20,7 +21,8 @@ export function MolarMassCalculator() {
   const [isPeriodicTableOpen, setIsPeriodicTableOpen] = useState(false);
   const [elementDetailsModalOpen, setElementDetailsModalOpen] = useState(false);
   const [selectedElementDetails, setSelectedElementDetails] = useState(null);
-  const { isDark, toggleDarkMode } = useDarkMode();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { settings, isDark, updateSettings } = useThemeSettings();
   const { history, addCalculation, removeEntry, clearHistory } = useCalculationHistory();
 
   useEffect(() => {
@@ -61,19 +63,39 @@ export function MolarMassCalculator() {
     }
   };
 
+  // Legacy dark mode toggle for backward compatibility
+  const toggleDarkMode = () => {
+    const newMode = isDark ? 'light' : 'dark';
+    updateSettings({ ...settings, mode: newMode });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900 transition-colors duration-500">
+    <div className={`min-h-screen bg-gradient-to-br ${settings.gradient} transition-colors duration-500`}>
+      {/* Settings Button */}
+      <button
+        onClick={() => setIsSettingsOpen(true)}
+        className="fixed top-6 left-6 z-50 p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 group"
+        aria-label="Open settings"
+      >
+        <Settings className="w-6 h-6 text-gray-600 dark:text-gray-400 group-hover:rotate-90 transition-transform duration-300" />
+        
+        {/* Tooltip */}
+        <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+          Settings
+        </div>
+      </button>
+
       <DarkModeToggle isDark={isDark} onToggle={toggleDarkMode} />
       
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 rounded-full shadow-lg">
+            <div className={`bg-gradient-to-r from-${settings.accentColor}-600 to-${settings.accentColor === 'blue' ? 'purple' : settings.accentColor}-600 p-3 rounded-full shadow-lg`}>
               <Beaker2 className="w-8 h-8 text-white" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          <h1 className={`text-4xl font-bold bg-gradient-to-r from-${settings.accentColor}-600 to-${settings.accentColor === 'blue' ? 'purple' : settings.accentColor}-600 bg-clip-text text-transparent mb-2`}>
             Molecular Mass Calculator
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -95,7 +117,7 @@ export function MolarMassCalculator() {
         {result && (
           <div className="max-w-6xl mx-auto mb-8">
             {/* Total Molar Mass */}
-            <div className="bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 rounded-2xl p-8 mb-8 text-white shadow-2xl">
+            <div className={`bg-gradient-to-r from-${settings.accentColor === 'green' ? 'green' : 'green'}-500 to-emerald-600 dark:from-${settings.accentColor === 'green' ? 'green' : 'green'}-600 dark:to-emerald-700 rounded-2xl p-8 mb-8 text-white shadow-2xl`}>
               <div className="flex items-center justify-center mb-4">
                 <Calculator className="w-12 h-12 mr-4" />
                 <div className="text-center">
@@ -141,9 +163,9 @@ export function MolarMassCalculator() {
                       </span>
                     </div>
                   ))}
-                  <div className="flex justify-between items-center py-3 border-t-2 border-gray-300 dark:border-gray-600 font-bold text-lg">
+                  <div className={`flex justify-between items-center py-3 border-t-2 border-gray-300 dark:border-gray-600 font-bold text-lg`}>
                     <span className="text-gray-800 dark:text-gray-200">Total Molar Mass:</span>
-                    <span className="text-green-600 dark:text-green-400">{result.totalMass} g/mol</span>
+                    <span className={`text-${settings.accentColor === 'green' ? 'green' : 'green'}-600 dark:text-${settings.accentColor === 'green' ? 'green' : 'green'}-400`}>{result.totalMass} g/mol</span>
                   </div>
                 </div>
               </div>
@@ -176,7 +198,7 @@ export function MolarMassCalculator() {
                 </p>
                 <button
                   onClick={() => setIsPeriodicTableOpen(true)}
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className={`inline-flex items-center px-4 py-2 bg-${settings.accentColor}-600 text-white rounded-lg hover:bg-${settings.accentColor}-700 transition-colors`}
                 >
                   <Table className="w-4 h-4 mr-2" />
                   Open Periodic Table
@@ -196,6 +218,14 @@ export function MolarMassCalculator() {
           </>
         )}
       </div>
+
+      {/* Settings Panel */}
+      <SettingsPanel
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        settings={settings}
+        onSettingsChange={updateSettings}
+      />
 
       {/* Periodic Table Modal */}
       <PeriodicTable
