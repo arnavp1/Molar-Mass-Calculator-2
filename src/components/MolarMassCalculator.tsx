@@ -108,12 +108,10 @@ export function MolarMassCalculator() {
               </div>
             </div>
 
-            {/* Unit Converter and Calculation Summary */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              <UnitConverter molarMass={result.totalMass} formula={formula} />
-              
-              {/* Calculation Summary */}
-              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20">
+            {/* Unit Converter and Calculation Summary - Side by Side */}
+            <div className="mb-8">
+              {/* Full Width Calculation Summary */}
+              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-white/20 dark:border-gray-700/20 mb-8">
                 <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Calculation Summary</h3>
                 <div className="space-y-2">
                   {result.breakdown.map((element) => (
@@ -132,38 +130,53 @@ export function MolarMassCalculator() {
                   </div>
                 </div>
               </div>
+
+              {/* Unit Converter and Calculation History Side by Side */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <UnitConverter molarMass={result.totalMass} formula={formula} />
+                
+                <CalculationHistory
+                  history={history}
+                  onSelectFormula={handleHistorySelect}
+                  onClearHistory={clearHistory}
+                  onRemoveEntry={removeEntry}
+                />
+              </div>
             </div>
           </div>
         )}
 
-        {/* Calculation History */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <CalculationHistory
-            history={history}
-            onSelectFormula={handleHistorySelect}
-            onClearHistory={clearHistory}
-            onRemoveEntry={removeEntry}
-          />
-        </div>
-
-        {/* Instructions for empty state */}
+        {/* When no formula is entered - show history at bottom and instructions above */}
         {!formula.trim() && (
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 dark:border-gray-700/20">
-              <Beaker2 className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-3">Ready to Calculate</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Enter a molecular formula above to see its molar mass calculation with detailed breakdown.
-              </p>
-              <button
-                onClick={() => setIsPeriodicTableOpen(true)}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Table className="w-4 h-4 mr-2" />
-                Open Periodic Table
-              </button>
+          <>
+            {/* Instructions for empty state */}
+            <div className="max-w-2xl mx-auto text-center mb-8">
+              <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-white/20 dark:border-gray-700/20">
+                <Beaker2 className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-3">Ready to Calculate</h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Enter a molecular formula above to see its molar mass calculation with detailed breakdown.
+                </p>
+                <button
+                  onClick={() => setIsPeriodicTableOpen(true)}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Table className="w-4 h-4 mr-2" />
+                  Open Periodic Table
+                </button>
+              </div>
             </div>
-          </div>
+
+            {/* Calculation History at bottom when no formula */}
+            <div className="max-w-4xl mx-auto">
+              <CalculationHistory
+                history={history}
+                onSelectFormula={handleHistorySelect}
+                onClearHistory={clearHistory}
+                onRemoveEntry={removeEntry}
+              />
+            </div>
+          </>
         )}
       </div>
 
