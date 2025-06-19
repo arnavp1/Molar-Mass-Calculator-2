@@ -90,13 +90,6 @@ export function MolarMassCalculator() {
         {/* Results Section */}
         {result && (
           <div className="max-w-6xl mx-auto mb-8">
-            {/* Compound Names */}
-            <CompoundNameDisplay 
-              compoundInfo={compoundInfo}
-              systematicName={systematicName}
-              formula={formula}
-            />
-
             {/* Total Molar Mass */}
             <div className="bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 rounded-2xl p-8 mb-8 text-white shadow-2xl">
               <div className="flex items-center justify-center mb-4">
@@ -106,10 +99,16 @@ export function MolarMassCalculator() {
                   <div className="text-5xl font-bold">
                     {result.totalMass} <span className="text-2xl">g/mol</span>
                   </div>
-                  <p className="text-green-100 mt-2">Formula: {formula}</p>
                 </div>
               </div>
             </div>
+
+            {/* Compound Names */}
+            <CompoundNameDisplay 
+              compoundInfo={compoundInfo}
+              systematicName={systematicName}
+              formula={formula}
+            />
 
             {/* Element Breakdown */}
             <div className="mb-8">
