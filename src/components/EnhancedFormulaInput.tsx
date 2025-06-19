@@ -79,9 +79,9 @@ export function EnhancedFormulaInput({
       
       {/* Formula preview with highlighting */}
       {formula.trim() && !isValid && errorPosition !== undefined && (
-        <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border">
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Formula preview:</div>
-          <div className="font-mono text-lg">
+        <div className="mt-2 p-3 bg-white/50 dark:bg-gray-700/80 rounded-lg border border-gray-200 dark:border-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">Formula preview:</div>
+          <div className="font-mono text-lg text-gray-800 dark:text-gray-100">
             {renderHighlightedFormula()}
           </div>
         </div>
