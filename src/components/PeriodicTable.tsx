@@ -179,8 +179,14 @@ export function PeriodicTable({ isOpen, onClose, onElementSelect }: PeriodicTabl
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
-        <div className="flex items-center justify-center p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Interactive Periodic Table</h2>
+          <button
+            onClick={onClose}
+            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
         <div className="p-6 overflow-auto max-h-[calc(90vh-120px)]">
@@ -202,35 +208,33 @@ export function PeriodicTable({ isOpen, onClose, onElementSelect }: PeriodicTabl
             {createPeriodicTableGrid()}
           </div>
 
-          {/* Legend - Centered */}
-          <div className="mb-6 flex justify-center">
-            <div className="max-w-4xl">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 text-center">Element Groups</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                <div className="flex items-center justify-center">
-                  <div className="w-4 h-4 bg-red-400 rounded mr-2"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Alkali Metals</span>
-                </div>
-                <div className="flex items-center justify-center">
-                  <div className="w-4 h-4 bg-orange-400 rounded mr-2"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Alkaline Earth</span>
-                </div>
-                <div className="flex items-center justify-center">
-                  <div className="w-4 h-4 bg-yellow-400 rounded mr-2"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Transition Metals</span>
-                </div>
-                <div className="flex items-center justify-center">
-                  <div className="w-4 h-4 bg-green-400 rounded mr-2"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Metalloids</span>
-                </div>
-                <div className="flex items-center justify-center">
-                  <div className="w-4 h-4 bg-blue-400 rounded mr-2"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Halogens</span>
-                </div>
-                <div className="flex items-center justify-center">
-                  <div className="w-4 h-4 bg-purple-400 rounded mr-2"></div>
-                  <span className="text-gray-700 dark:text-gray-300">Noble Gases</span>
-                </div>
+          {/* Legend */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Element Groups</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+              <div className="flex items-center">
+                <div className="w-4 h-4 bg-red-400 rounded mr-2"></div>
+                <span className="text-gray-700 dark:text-gray-300">Alkali Metals</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-4 h-4 bg-orange-400 rounded mr-2"></div>
+                <span className="text-gray-700 dark:text-gray-300">Alkaline Earth</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-4 h-4 bg-yellow-400 rounded mr-2"></div>
+                <span className="text-gray-700 dark:text-gray-300">Transition Metals</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-4 h-4 bg-green-400 rounded mr-2"></div>
+                <span className="text-gray-700 dark:text-gray-300">Metalloids</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-4 h-4 bg-blue-400 rounded mr-2"></div>
+                <span className="text-gray-700 dark:text-gray-300">Halogens</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-4 h-4 bg-purple-400 rounded mr-2"></div>
+                <span className="text-gray-700 dark:text-gray-300">Noble Gases</span>
               </div>
             </div>
           </div>
@@ -262,6 +266,15 @@ export function PeriodicTable({ isOpen, onClose, onElementSelect }: PeriodicTabl
               </div>
             </div>
           )}
+
+          <div className="text-center">
+            <button
+              onClick={onClose}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
