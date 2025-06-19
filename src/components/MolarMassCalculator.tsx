@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calculator, Beaker as Beaker2, Table } from 'lucide-react';
 import { parseFormula } from '../utils/formulaParser';
 import { calculateMolarMass, MolarMassResult } from '../utils/molarMassCalculator';
-import { getCompoundInfo, generateSystematicName } from '../data/compoundNames';
+import { pubchemService, PubChemCompoundInfo } from '../services/pubchemService';
 import { ElementCard } from './ElementCard';
 import { DarkModeToggle } from './DarkModeToggle';
 import { CalculationHistory } from './CalculationHistory';
@@ -18,6 +18,9 @@ export function MolarMassCalculator() {
   const [result, setResult] = useState<MolarMassResult | null>(null);
   const [parseResult, setParseResult] = useState({ elements: [], isValid: false });
   const [isPeriodicTableOpen, setIsPeriodicTableOpen] = useState(false);
+  const [compoundInfo, setCompoundInfo] = useState<PubChemCompoundInfo | null>(null);
+  const [isLoadingCompoundInfo, setIsLoadingCompoundInfo] = useState(false);
+  const [compoundInfoError, setCompoundInfoError] = useState<string | undefined>();
   const { isDark, toggleDarkMode } = useDarkMode();
   const { history, addCalculation, removeEntry, clearHistory } = useCalculationHistory();
 
@@ -25,6 +28,8 @@ export function MolarMassCalculator() {
     if (!formula.trim()) {
       setResult(null);
       setParseResult({ elements: [], isValid: false });
+      setCompoundInfo(null);
+      setCompoundInfoError(undefined);
       return;
     }
 
@@ -37,10 +42,35 @@ export function MolarMassCalculator() {
       
       // Add to history
       addCalculation(formula, molarMassResult.totalMass);
+
+      // Fetch compound information from PubChem
+      fetchCompoundInfo(formula);
     } else {
       setResult(null);
+      setCompoundInfo(null);
+      setCompoundInfoError(undefined);
     }
   }, [formula, addCalculation]);
+
+  const fetchCompoundInfo = async (formulaToFetch: string) => {
+    setIsLoadingCompoundInfo(true);
+    setCompoundInfoError(undefined);
+    
+    try {
+      const info = await pubchemService.getCompoundInfo(formulaToFetch);
+      setCompoundInfo(info);
+      
+      if (!info) {
+        setCompoundInfoError('No compound information found in PubChem database');
+      }
+    } catch (error) {
+      console.error('Error fetching compound info:', error);
+      setCompoundInfoError('Failed to fetch compound information');
+      setCompoundInfo(null);
+    } finally {
+      setIsLoadingCompoundInfo(false);
+    }
+  };
 
   const handleElementSelect = (element: string) => {
     setFormula(prev => prev + element);
@@ -50,12 +80,6 @@ export function MolarMassCalculator() {
   const handleHistorySelect = (selectedFormula: string) => {
     setFormula(selectedFormula);
   };
-
-  // Get compound naming information
-  const compoundInfo = formula.trim() && parseResult.isValid ? getCompoundInfo(formula) : null;
-  const systematicName = formula.trim() && parseResult.isValid && !compoundInfo 
-    ? generateSystematicName(formula, parseResult.elements) 
-    : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900 transition-colors duration-500">
@@ -73,7 +97,7 @@ export function MolarMassCalculator() {
             Molecular Mass Calculator
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Enter a molecular formula to calculate its molar mass with detailed breakdown
+            Enter a molecular formula to calculate its molar mass with detailed breakdown and compound names
           </p>
         </div>
 
@@ -93,8 +117,9 @@ export function MolarMassCalculator() {
             {/* Compound Names */}
             <CompoundNameDisplay 
               compoundInfo={compoundInfo}
-              systematicName={systematicName}
               formula={formula}
+              isLoading={isLoadingCompoundInfo}
+              error={compoundInfoError}
             />
 
             {/* Total Molar Mass */}
@@ -170,7 +195,7 @@ export function MolarMassCalculator() {
                 <Beaker2 className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-3">Ready to Calculate</h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  Enter a molecular formula above to see its molar mass calculation with detailed breakdown.
+                  Enter a molecular formula above to see its molar mass calculation with detailed breakdown and compound names from PubChem.
                 </p>
                 <button
                   onClick={() => setIsPeriodicTableOpen(true)}
