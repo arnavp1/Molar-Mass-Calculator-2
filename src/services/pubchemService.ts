@@ -15,9 +15,14 @@ class PubChemService {
     }
 
     try {
+      console.log(`Fetching compound info for formula: ${formula}`);
+      
       // Step 1: Get CID from molecular formula
       const cid = await this.getCIDFromFormula(formula);
+      console.log(`CID found: ${cid}`);
+      
       if (!cid) {
+        console.log('No CID found for formula');
         this.cache.set(formula, {});
         return null;
       }
@@ -28,12 +33,17 @@ class PubChemService {
         this.getIUPACName(cid)
       ]);
 
+      console.log('Synonyms:', synonyms);
+      console.log('IUPAC Name:', iupacName);
+
       const compoundInfo: PubChemCompoundInfo = {
         cid,
         iupacName,
         synonyms,
         commonName: this.extractCommonName(synonyms)
       };
+
+      console.log('Final compound info:', compoundInfo);
 
       // Cache the result
       this.cache.set(formula, compoundInfo);
@@ -42,32 +52,59 @@ class PubChemService {
     } catch (error) {
       console.error('Error fetching compound info from PubChem:', error);
       this.cache.set(formula, {});
-      return null;
+      throw error; // Re-throw to trigger error state in UI
     }
   }
 
   private async getCIDFromFormula(formula: string): Promise<number | null> {
     try {
-      // Use a CORS proxy to access PubChem API
-      const proxyUrl = 'https://api.allorigins.win/raw?url=';
+      // Try multiple CORS proxies and direct approach
+      const proxies = [
+        'https://api.allorigins.win/raw?url=',
+        'https://cors-anywhere.herokuapp.com/',
+        '' // Direct request (might work in some environments)
+      ];
+
       const targetUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/fastformula/${encodeURIComponent(formula)}/cids/JSON`;
       
-      const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      for (const proxy of proxies) {
+        try {
+          const url = proxy ? proxy + encodeURIComponent(targetUrl) : targetUrl;
+          console.log(`Trying URL: ${url}`);
+          
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            }
+          });
+          
+          console.log(`Response status: ${response.status}`);
+          
+          if (!response.ok) {
+            console.log(`HTTP error! status: ${response.status}`);
+            continue; // Try next proxy
+          }
 
-      const data = await response.json();
-      
-      // Return the first CID if available
-      if (data.IdentifierList?.CID && data.IdentifierList.CID.length > 0) {
-        return data.IdentifierList.CID[0];
+          const text = await response.text();
+          console.log('Raw response:', text);
+          
+          const data = JSON.parse(text);
+          console.log('Parsed data:', data);
+          
+          // Return the first CID if available
+          if (data.IdentifierList?.CID && data.IdentifierList.CID.length > 0) {
+            return data.IdentifierList.CID[0];
+          }
+          
+          // If we get here, no CID was found but request was successful
+          return null;
+          
+        } catch (proxyError) {
+          console.error(`Error with proxy ${proxy}:`, proxyError);
+          continue; // Try next proxy
+        }
       }
       
       return null;
@@ -79,24 +116,43 @@ class PubChemService {
 
   private async getSynonyms(cid: number): Promise<string[]> {
     try {
-      const proxyUrl = 'https://api.allorigins.win/raw?url=';
+      const proxies = [
+        'https://api.allorigins.win/raw?url=',
+        'https://cors-anywhere.herokuapp.com/',
+        ''
+      ];
+
       const targetUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/synonyms/JSON`;
       
-      const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      for (const proxy of proxies) {
+        try {
+          const url = proxy ? proxy + encodeURIComponent(targetUrl) : targetUrl;
+          
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            }
+          });
+          
+          if (!response.ok) {
+            continue;
+          }
 
-      const data = await response.json();
-      
-      if (data.InformationList?.Information && data.InformationList.Information.length > 0) {
-        return data.InformationList.Information[0].Synonym || [];
+          const text = await response.text();
+          const data = JSON.parse(text);
+          
+          if (data.InformationList?.Information && data.InformationList.Information.length > 0) {
+            return data.InformationList.Information[0].Synonym || [];
+          }
+          
+          return [];
+          
+        } catch (proxyError) {
+          console.error(`Error getting synonyms with proxy ${proxy}:`, proxyError);
+          continue;
+        }
       }
       
       return [];
@@ -108,24 +164,43 @@ class PubChemService {
 
   private async getIUPACName(cid: number): Promise<string | undefined> {
     try {
-      const proxyUrl = 'https://api.allorigins.win/raw?url=';
+      const proxies = [
+        'https://api.allorigins.win/raw?url=',
+        'https://cors-anywhere.herokuapp.com/',
+        ''
+      ];
+
       const targetUrl = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${cid}/property/IUPACName/JSON`;
       
-      const response = await fetch(proxyUrl + encodeURIComponent(targetUrl), {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      for (const proxy of proxies) {
+        try {
+          const url = proxy ? proxy + encodeURIComponent(targetUrl) : targetUrl;
+          
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            }
+          });
+          
+          if (!response.ok) {
+            continue;
+          }
 
-      const data = await response.json();
-      
-      if (data.PropertyTable?.Properties && data.PropertyTable.Properties.length > 0) {
-        return data.PropertyTable.Properties[0].IUPACName;
+          const text = await response.text();
+          const data = JSON.parse(text);
+          
+          if (data.PropertyTable?.Properties && data.PropertyTable.Properties.length > 0) {
+            return data.PropertyTable.Properties[0].IUPACName;
+          }
+          
+          return undefined;
+          
+        } catch (proxyError) {
+          console.error(`Error getting IUPAC name with proxy ${proxy}:`, proxyError);
+          continue;
+        }
       }
       
       return undefined;
@@ -172,21 +247,7 @@ class PubChemService {
       /^ozone$/i,
       /^caffeine$/i,
       /^aspirin$/i,
-      /^ibuprofen$/i,
-      /^penicillin$/i,
-      /^insulin$/i,
-      /^morphine$/i,
-      /^nicotine$/i,
-      /^cocaine$/i,
-      /^heroin$/i,
-      /^lsd$/i,
-      /^thc$/i,
-      /^dna$/i,
-      /^rna$/i,
-      /^atp$/i,
-      /^adp$/i,
-      /^nadh$/i,
-      /^fad$/i
+      /^ibuprofen$/i
     ];
 
     // First, try to find exact matches with common name patterns

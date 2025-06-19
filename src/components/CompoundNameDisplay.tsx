@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Beaker, Tag, Loader2, ExternalLink, AlertCircle } from 'lucide-react';
+import { BookOpen, Beaker, Tag, Loader2, ExternalLink, AlertCircle, Info } from 'lucide-react';
 import { PubChemCompoundInfo } from '../services/pubchemService';
 
 interface CompoundNameDisplayProps {
@@ -18,7 +18,7 @@ export function CompoundNameDisplay({ compoundInfo, formula, isLoading, error }:
           <span className="text-lg">Looking up compound names from PubChem...</span>
         </div>
         <div className="text-center mt-2 text-indigo-200 text-sm">
-          This may take a few seconds for the first lookup
+          Searching molecular formula database - this may take a few seconds
         </div>
       </div>
     );
@@ -35,18 +35,18 @@ export function CompoundNameDisplay({ compoundInfo, formula, isLoading, error }:
           <div className="text-red-100 mb-2">Formula: {formula}</div>
           <div className="text-red-200">{error}</div>
           <div className="text-red-300 text-sm mt-2">
-            Try checking your internet connection or try again later
+            This could be due to network issues or the compound not being in PubChem's database
           </div>
         </div>
       </div>
     );
   }
 
-  if (!compoundInfo || (!compoundInfo.commonName && !compoundInfo.iupacName)) {
+  if (!compoundInfo || (!compoundInfo.commonName && !compoundInfo.iupacName && (!compoundInfo.synonyms || compoundInfo.synonyms.length === 0))) {
     return (
       <div className="bg-gradient-to-r from-gray-500 to-gray-600 dark:from-gray-600 dark:to-gray-700 rounded-2xl p-6 mb-8 text-white shadow-2xl">
         <div className="flex items-center justify-center mb-4">
-          <BookOpen className="w-8 h-8 mr-3" />
+          <Info className="w-8 h-8 mr-3" />
           <h2 className="text-2xl font-bold">Compound Names</h2>
         </div>
         
@@ -59,7 +59,10 @@ export function CompoundNameDisplay({ compoundInfo, formula, isLoading, error }:
             No naming information found in PubChem database for this compound.
           </div>
           <div className="text-sm text-gray-300 mt-2">
-            This may be a theoretical compound or one not yet catalogued in PubChem.
+            This may be a theoretical compound, a mixture, or one not yet catalogued in PubChem.
+          </div>
+          <div className="text-xs text-gray-400 mt-2">
+            Try common compounds like H2O, C6H12O6, CH4, or NaCl
           </div>
         </div>
       </div>
