@@ -1,4 +1,4 @@
-// Atomic masses of elements (in g/mol)
+// Atomic masses of elements (in g/mol) - Complete periodic table
 export const atomicMasses: Record<string, number> = {
   H: 1.008,
   He: 4.003,
@@ -91,7 +91,33 @@ export const atomicMasses: Record<string, number> = {
   Ac: 227.03,
   Th: 232.04,
   Pa: 231.04,
-  U: 238.03
+  U: 238.03,
+  Np: 237.05,
+  Pu: 244.06,
+  Am: 243.06,
+  Cm: 247.07,
+  Bk: 247.07,
+  Cf: 251.08,
+  Es: 252.08,
+  Fm: 257.10,
+  Md: 258.10,
+  No: 259.10,
+  Lr: 262.11,
+  Rf: 267.12,
+  Db: 268.13,
+  Sg: 271.13,
+  Bh: 272.14,
+  Hs: 270.13,
+  Mt: 276.15,
+  Ds: 281.16,
+  Rg: 280.16,
+  Cn: 285.17,
+  Nh: 284.18,
+  Fl: 289.19,
+  Mc: 288.19,
+  Lv: 293.20,
+  Ts: 294.21,
+  Og: 294.21
 };
 
 export const elementNames: Record<string, string> = {
@@ -186,5 +212,31 @@ export const elementNames: Record<string, string> = {
   Ac: 'Actinium',
   Th: 'Thorium',
   Pa: 'Protactinium',
-  U: 'Uranium'
+  U: 'Uranium',
+  Np: 'Neptunium',
+  Pu: 'Plutonium',
+  Am: 'Americium',
+  Cm: 'Curium',
+  Bk: 'Berkelium',
+  Cf: 'Californium',
+  Es: 'Einsteinium',
+  Fm: 'Fermium',
+  Md: 'Mendelevium',
+  No: 'Nobelium',
+  Lr: 'Lawrencium',
+  Rf: 'Rutherfordium',
+  Db: 'Dubnium',
+  Sg: 'Seaborgium',
+  Bh: 'Bohrium',
+  Hs: 'Hassium',
+  Mt: 'Meitnerium',
+  Ds: 'Darmstadtium',
+  Rg: 'Roentgenium',
+  Cn: 'Copernicium',
+  Nh: 'Nihonium',
+  Fl: 'Flerovium',
+  Mc: 'Moscovium',
+  Lv: 'Livermorium',
+  Ts: 'Tennessine',
+  Og: 'Oganesson'
 };
