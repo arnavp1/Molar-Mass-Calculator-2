@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Calculator, Beaker as Beaker2, Table } from 'lucide-react';
 import { parseFormula } from '../utils/formulaParser';
 import { calculateMolarMass, MolarMassResult } from '../utils/molarMassCalculator';
+import { getCompoundInfo, generateSystematicName } from '../data/compoundNames';
 import { ElementCard } from './ElementCard';
 import { DarkModeToggle } from './DarkModeToggle';
 import { CalculationHistory } from './CalculationHistory';
 import { PeriodicTable } from './PeriodicTable';
 import { UnitConverter } from './UnitConverter';
 import { EnhancedFormulaInput } from './EnhancedFormulaInput';
+import { CompoundNameDisplay } from './CompoundNameDisplay';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useCalculationHistory } from '../hooks/useCalculationHistory';
 
@@ -49,6 +51,12 @@ export function MolarMassCalculator() {
     setFormula(selectedFormula);
   };
 
+  // Get compound naming information
+  const compoundInfo = formula.trim() && parseResult.isValid ? getCompoundInfo(formula) : null;
+  const systematicName = formula.trim() && parseResult.isValid && !compoundInfo 
+    ? generateSystematicName(formula, parseResult.elements) 
+    : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900 transition-colors duration-500">
       <DarkModeToggle isDark={isDark} onToggle={toggleDarkMode} />
@@ -82,6 +90,13 @@ export function MolarMassCalculator() {
         {/* Results Section */}
         {result && (
           <div className="max-w-6xl mx-auto mb-8">
+            {/* Compound Names */}
+            <CompoundNameDisplay 
+              compoundInfo={compoundInfo}
+              systematicName={systematicName}
+              formula={formula}
+            />
+
             {/* Total Molar Mass */}
             <div className="bg-gradient-to-r from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 rounded-2xl p-8 mb-8 text-white shadow-2xl">
               <div className="flex items-center justify-center mb-4">
