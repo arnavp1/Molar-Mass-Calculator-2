@@ -4,7 +4,6 @@ import { Settings, X, Palette, Monitor, Sun, Moon } from 'lucide-react';
 export interface ThemeSettings {
   mode: 'light' | 'dark' | 'system';
   gradient: string;
-  accentColor: string;
 }
 
 interface SettingsPanelProps {
@@ -57,17 +56,6 @@ const gradientOptions = [
   }
 ];
 
-const accentColorOptions = [
-  { name: 'Blue', value: 'blue', preview: 'bg-blue-500' },
-  { name: 'Purple', value: 'purple', preview: 'bg-purple-500' },
-  { name: 'Green', value: 'green', preview: 'bg-green-500' },
-  { name: 'Red', value: 'red', preview: 'bg-red-500' },
-  { name: 'Orange', value: 'orange', preview: 'bg-orange-500' },
-  { name: 'Pink', value: 'pink', preview: 'bg-pink-500' },
-  { name: 'Teal', value: 'teal', preview: 'bg-teal-500' },
-  { name: 'Indigo', value: 'indigo', preview: 'bg-indigo-500' }
-];
-
 export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: SettingsPanelProps) {
   const [activeTab, setActiveTab] = useState<'theme' | 'colors'>('theme');
 
@@ -85,10 +73,6 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
 
   const handleGradientChange = (gradient: string) => {
     onSettingsChange({ ...settings, gradient });
-  };
-
-  const handleAccentColorChange = (accentColor: string) => {
-    onSettingsChange({ ...settings, accentColor });
   };
 
   return (
@@ -133,7 +117,7 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
             }`}
           >
             <Palette className="w-4 h-4 inline mr-2" />
-            Colors & Gradients
+            Background Gradients
           </button>
         </div>
 
@@ -230,31 +214,6 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
                 </div>
               </div>
 
-              {/* Accent Colors */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-                  Accent Color
-                </h3>
-                <div className="grid grid-cols-4 gap-3">
-                  {accentColorOptions.map((option) => (
-                    <button
-                      key={option.name}
-                      onClick={() => handleAccentColorChange(option.value)}
-                      className={`flex flex-col items-center p-3 rounded-lg border-2 transition-all ${
-                        settings.accentColor === option.value
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                      }`}
-                    >
-                      <div className={`w-8 h-8 rounded-full ${option.preview} mb-2 shadow-sm`}></div>
-                      <div className="text-xs font-medium text-gray-800 dark:text-gray-200">
-                        {option.name}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Preview */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
@@ -263,14 +222,14 @@ export function SettingsPanel({ isOpen, onClose, settings, onSettingsChange }: S
                 <div className={`p-6 rounded-lg bg-gradient-to-br ${settings.gradient} border border-gray-200 dark:border-gray-600`}>
                   <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/20 dark:border-gray-700/20">
                     <div className="flex items-center mb-3">
-                      <div className={`w-8 h-8 bg-${settings.accentColor}-500 rounded-full mr-3`}></div>
+                      <div className="w-8 h-8 bg-blue-500 rounded-full mr-3"></div>
                       <div>
                         <div className="font-semibold text-gray-800 dark:text-gray-200">Sample Element</div>
                         <div className="text-sm text-gray-600 dark:text-gray-400">Preview of your theme</div>
                       </div>
                     </div>
-                    <div className={`px-3 py-1 bg-${settings.accentColor}-100 dark:bg-${settings.accentColor}-900/30 text-${settings.accentColor}-700 dark:text-${settings.accentColor}-300 rounded-full text-sm inline-block`}>
-                      Accent Color
+                    <div className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm inline-block">
+                      Sample Badge
                     </div>
                   </div>
                 </div>
