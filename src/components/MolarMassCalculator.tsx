@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Calculator, Beaker as Beaker2, Table } from 'lucide-react';
 import { parseFormula } from '../utils/formulaParser';
 import { calculateMolarMass, MolarMassResult } from '../utils/molarMassCalculator';
-import { getCompoundInfo, generateSystematicName } from '../data/compoundNames';
+import { getCompoundInfo as getLocalCompoundInfo, generateSystematicName } from '../data/compoundNames';
+import { getCompoundInfo as getExternalCompoundInfo, ExternalCompoundInfo } from '../services/compoundLookup';
 import { ElementCard } from './ElementCard';
 import { DarkModeToggle } from './DarkModeToggle';
 import { CalculationHistory } from './CalculationHistory';
@@ -18,6 +19,8 @@ export function MolarMassCalculator() {
   const [result, setResult] = useState<MolarMassResult | null>(null);
   const [parseResult, setParseResult] = useState({ elements: [], isValid: false });
   const [isPeriodicTableOpen, setIsPeriodicTableOpen] = useState(false);
+  const [compoundInfo, setCompoundInfo] = useState<ExternalCompoundInfo | null>(null);
+  const [isLoadingCompoundInfo, setIsLoadingCompoundInfo] = useState(false);
   const { isDark, toggleDarkMode } = useDarkMode();
   const { history, addCalculation, removeEntry, clearHistory } = useCalculationHistory();
 
@@ -25,6 +28,7 @@ export function MolarMassCalculator() {
     if (!formula.trim()) {
       setResult(null);
       setParseResult({ elements: [], isValid: false });
+      setCompoundInfo(null);
       return;
     }
 
@@ -37,10 +41,42 @@ export function MolarMassCalculator() {
       
       // Add to history
       addCalculation(formula, molarMassResult.totalMass);
+
+      // Fetch compound information
+      fetchCompoundInfo(formula);
     } else {
       setResult(null);
+      setCompoundInfo(null);
     }
   }, [formula, addCalculation]);
+
+  const fetchCompoundInfo = async (formulaToLookup: string) => {
+    setIsLoadingCompoundInfo(true);
+    setCompoundInfo(null);
+
+    try {
+      // First try local database for instant results
+      const localInfo = getLocalCompoundInfo(formulaToLookup);
+      if (localInfo) {
+        setCompoundInfo({
+          commonName: localInfo.commonName,
+          iupacName: localInfo.iupacName,
+          category: localInfo.category
+        });
+        setIsLoadingCompoundInfo(false);
+        return;
+      }
+
+      // If not found locally, try external database
+      const externalInfo = await getExternalCompoundInfo(formulaToLookup);
+      setCompoundInfo(externalInfo);
+    } catch (error) {
+      console.error('Error fetching compound info:', error);
+      setCompoundInfo(null);
+    } finally {
+      setIsLoadingCompoundInfo(false);
+    }
+  };
 
   const handleElementSelect = (element: string) => {
     setFormula(prev => prev + element);
@@ -51,8 +87,7 @@ export function MolarMassCalculator() {
     setFormula(selectedFormula);
   };
 
-  // Get compound naming information
-  const compoundInfo = formula.trim() && parseResult.isValid ? getCompoundInfo(formula) : null;
+  // Get systematic name as fallback
   const systematicName = formula.trim() && parseResult.isValid && !compoundInfo 
     ? generateSystematicName(formula, parseResult.elements) 
     : null;
@@ -108,6 +143,7 @@ export function MolarMassCalculator() {
               compoundInfo={compoundInfo}
               systematicName={systematicName}
               formula={formula}
+              isLoading={isLoadingCompoundInfo}
             />
 
             {/* Element Breakdown */}
