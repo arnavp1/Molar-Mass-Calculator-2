@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { X, Search } from 'lucide-react';
+import { X, Search, Info } from 'lucide-react';
 import { atomicMasses, elementNames } from '../data/atomicMasses';
+import { getElementDetails } from '../data/elementDetails';
+import { ElementDetailsModal } from './ElementDetailsModal';
 
 interface PeriodicTableProps {
   isOpen: boolean;
@@ -159,6 +161,8 @@ const periodicTableData: ElementData[] = [
 export function PeriodicTable({ isOpen, onClose, onElementSelect }: PeriodicTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedElement, setSelectedElement] = useState<ElementData | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [elementDetails, setElementDetails] = useState(null);
 
   if (!isOpen) return null;
 
@@ -206,6 +210,20 @@ export function PeriodicTable({ isOpen, onClose, onElementSelect }: PeriodicTabl
     return 'bg-gray-400 hover:bg-gray-500 text-white';
   };
 
+  const handleElementClick = (element: ElementData) => {
+    setSelectedElement(element);
+    onElementSelect(element.symbol);
+  };
+
+  const handleElementRightClick = (e: React.MouseEvent, element: ElementData) => {
+    e.preventDefault();
+    const details = getElementDetails(element.symbol);
+    if (details) {
+      setElementDetails(details);
+      setDetailsModalOpen(true);
+    }
+  };
+
   const createPeriodicTableGrid = () => {
     const grid = [];
     const maxPeriods = 7;
@@ -231,24 +249,28 @@ export function PeriodicTable({ isOpen, onClose, onElementSelect }: PeriodicTabl
 
         if (element) {
           const isVisible = filteredElements.includes(element);
+          const hasDetails = getElementDetails(element.symbol) !== null;
+          
           row.push(
-            <button
-              key={element.symbol}
-              onClick={() => {
-                setSelectedElement(element);
-                onElementSelect(element.symbol);
-              }}
-              className={`w-12 h-12 border border-gray-300 dark:border-gray-600 rounded text-xs font-bold transition-all duration-200 hover:scale-110 hover:shadow-lg ${
-                getElementColor(element)
-              } ${!isVisible ? 'opacity-30' : ''}`}
-              title={`${element.name} (${element.symbol}) - ${element.atomicMass} g/mol - Atomic #${element.atomicNumber}`}
-            >
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="text-[8px] opacity-80">{element.atomicNumber}</div>
-                <div className="text-xs font-bold">{element.symbol}</div>
-                <div className="text-[7px] opacity-70">{element.atomicMass}</div>
-              </div>
-            </button>
+            <div key={element.symbol} className="relative group">
+              <button
+                onClick={() => handleElementClick(element)}
+                onContextMenu={(e) => handleElementRightClick(e, element)}
+                className={`w-12 h-12 border border-gray-300 dark:border-gray-600 rounded text-xs font-bold transition-all duration-200 hover:scale-110 hover:shadow-lg ${
+                  getElementColor(element)
+                } ${!isVisible ? 'opacity-30' : ''} relative`}
+                title={`${element.name} (${element.symbol}) - ${element.atomicMass} g/mol - Atomic #${element.atomicNumber}${hasDetails ? ' • Right-click for details' : ''}`}
+              >
+                <div className="flex flex-col items-center justify-center h-full">
+                  <div className="text-[8px] opacity-80">{element.atomicNumber}</div>
+                  <div className="text-xs font-bold">{element.symbol}</div>
+                  <div className="text-[7px] opacity-70">{element.atomicMass}</div>
+                </div>
+                {hasDetails && (
+                  <Info className="absolute -top-1 -right-1 w-3 h-3 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+              </button>
+            </div>
           );
         } else {
           // Empty cell for proper spacing
@@ -276,24 +298,28 @@ export function PeriodicTable({ isOpen, onClose, onElementSelect }: PeriodicTabl
     const lanthanides = periodicTableData.filter(el => el.atomicNumber >= 57 && el.atomicNumber <= 71);
     const lanthanidesRow = lanthanides.map(element => {
       const isVisible = filteredElements.includes(element);
+      const hasDetails = getElementDetails(element.symbol) !== null;
+      
       return (
-        <button
-          key={element.symbol}
-          onClick={() => {
-            setSelectedElement(element);
-            onElementSelect(element.symbol);
-          }}
-          className={`w-12 h-12 border border-gray-300 dark:border-gray-600 rounded text-xs font-bold transition-all duration-200 hover:scale-110 hover:shadow-lg ${
-            getElementColor(element)
-          } ${!isVisible ? 'opacity-30' : ''}`}
-          title={`${element.name} (${element.symbol}) - ${element.atomicMass} g/mol - Atomic #${element.atomicNumber}`}
-        >
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className="text-[8px] opacity-80">{element.atomicNumber}</div>
-            <div className="text-xs font-bold">{element.symbol}</div>
-            <div className="text-[7px] opacity-70">{element.atomicMass}</div>
-          </div>
-        </button>
+        <div key={element.symbol} className="relative group">
+          <button
+            onClick={() => handleElementClick(element)}
+            onContextMenu={(e) => handleElementRightClick(e, element)}
+            className={`w-12 h-12 border border-gray-300 dark:border-gray-600 rounded text-xs font-bold transition-all duration-200 hover:scale-110 hover:shadow-lg ${
+              getElementColor(element)
+            } ${!isVisible ? 'opacity-30' : ''} relative`}
+            title={`${element.name} (${element.symbol}) - ${element.atomicMass} g/mol - Atomic #${element.atomicNumber}${hasDetails ? ' • Right-click for details' : ''}`}
+          >
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="text-[8px] opacity-80">{element.atomicNumber}</div>
+              <div className="text-xs font-bold">{element.symbol}</div>
+              <div className="text-[7px] opacity-70">{element.atomicMass}</div>
+            </div>
+            {hasDetails && (
+              <Info className="absolute -top-1 -right-1 w-3 h-3 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            )}
+          </button>
+        </div>
       );
     });
 
@@ -310,24 +336,28 @@ export function PeriodicTable({ isOpen, onClose, onElementSelect }: PeriodicTabl
     const actinides = periodicTableData.filter(el => el.atomicNumber >= 89 && el.atomicNumber <= 103);
     const actinidesRow = actinides.map(element => {
       const isVisible = filteredElements.includes(element);
+      const hasDetails = getElementDetails(element.symbol) !== null;
+      
       return (
-        <button
-          key={element.symbol}
-          onClick={() => {
-            setSelectedElement(element);
-            onElementSelect(element.symbol);
-          }}
-          className={`w-12 h-12 border border-gray-300 dark:border-gray-600 rounded text-xs font-bold transition-all duration-200 hover:scale-110 hover:shadow-lg ${
-            getElementColor(element)
-          } ${!isVisible ? 'opacity-30' : ''}`}
-          title={`${element.name} (${element.symbol}) - ${element.atomicMass} g/mol - Atomic #${element.atomicNumber}`}
-        >
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className="text-[8px] opacity-80">{element.atomicNumber}</div>
-            <div className="text-xs font-bold">{element.symbol}</div>
-            <div className="text-[7px] opacity-70">{element.atomicMass}</div>
-          </div>
-        </button>
+        <div key={element.symbol} className="relative group">
+          <button
+            onClick={() => handleElementClick(element)}
+            onContextMenu={(e) => handleElementRightClick(e, element)}
+            className={`w-12 h-12 border border-gray-300 dark:border-gray-600 rounded text-xs font-bold transition-all duration-200 hover:scale-110 hover:shadow-lg ${
+              getElementColor(element)
+            } ${!isVisible ? 'opacity-30' : ''} relative`}
+            title={`${element.name} (${element.symbol}) - ${element.atomicMass} g/mol - Atomic #${element.atomicNumber}${hasDetails ? ' • Right-click for details' : ''}`}
+          >
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="text-[8px] opacity-80">{element.atomicNumber}</div>
+              <div className="text-xs font-bold">{element.symbol}</div>
+              <div className="text-[7px] opacity-70">{element.atomicMass}</div>
+            </div>
+            {hasDetails && (
+              <Info className="absolute -top-1 -right-1 w-3 h-3 text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            )}
+          </button>
+        </div>
       );
     });
 
@@ -344,124 +374,152 @@ export function PeriodicTable({ isOpen, onClose, onElementSelect }: PeriodicTabl
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-7xl w-full max-h-[95vh] overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Interactive Periodic Table</h2>
-          <button
-            onClick={onClose}
-            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        <div className="p-6 overflow-auto max-h-[calc(95vh-120px)]">
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search elements..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-          </div>
-
-          {/* Periodic Table Grid */}
-          <div className="space-y-1 mb-6">
-            {createPeriodicTableGrid()}
-          </div>
-
-          {/* Legend */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 text-center">Element Groups</h3>
-            <div className="flex flex-wrap justify-center gap-4 text-sm">
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-red-400 rounded mr-2"></div>
-                <span className="text-gray-700 dark:text-gray-300">Alkali Metals</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-orange-400 rounded mr-2"></div>
-                <span className="text-gray-700 dark:text-gray-300">Alkaline Earth</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-yellow-400 rounded mr-2"></div>
-                <span className="text-gray-700 dark:text-gray-300">Transition Metals</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-green-400 rounded mr-2"></div>
-                <span className="text-gray-700 dark:text-gray-300">Post-transition Metals</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-teal-400 rounded mr-2"></div>
-                <span className="text-gray-700 dark:text-gray-300">Metalloids</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-blue-400 rounded mr-2"></div>
-                <span className="text-gray-700 dark:text-gray-300">Nonmetals</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-indigo-400 rounded mr-2"></div>
-                <span className="text-gray-700 dark:text-gray-300">Halogens</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-purple-400 rounded mr-2"></div>
-                <span className="text-gray-700 dark:text-gray-300">Noble Gases</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-pink-400 rounded mr-2"></div>
-                <span className="text-gray-700 dark:text-gray-300">Lanthanides</span>
-              </div>
-            </div>
-          </div>
-
-          {selectedElement && (
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
-                {selectedElement.name} ({selectedElement.symbol})
-              </h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Atomic Number:</span>
-                  <span className="ml-2 font-medium text-gray-800 dark:text-gray-200">
-                    {selectedElement.atomicNumber}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Atomic Mass:</span>
-                  <span className="ml-2 font-medium text-gray-800 dark:text-gray-200">
-                    {selectedElement.atomicMass} g/mol
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Group:</span>
-                  <span className="ml-2 font-medium text-gray-800 dark:text-gray-200">
-                    {selectedElement.group}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Period:</span>
-                  <span className="ml-2 font-medium text-gray-800 dark:text-gray-200">
-                    {selectedElement.period}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="text-center">
+    <>
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-7xl w-full max-h-[95vh] overflow-hidden">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Interactive Periodic Table</h2>
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
             >
-              Close
+              <X className="w-6 h-6" />
             </button>
+          </div>
+
+          <div className="p-6 overflow-auto max-h-[calc(95vh-120px)]">
+            <div className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search elements..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 text-center">
+                Click to add to formula • Right-click for detailed information
+              </div>
+            </div>
+
+            {/* Periodic Table Grid */}
+            <div className="space-y-1 mb-6">
+              {createPeriodicTableGrid()}
+            </div>
+
+            {/* Legend */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 text-center">Element Groups</h3>
+              <div className="flex flex-wrap justify-center gap-4 text-sm">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-red-400 rounded mr-2"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Alkali Metals</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-orange-400 rounded mr-2"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Alkaline Earth</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-yellow-400 rounded mr-2"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Transition Metals</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-green-400 rounded mr-2"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Post-transition Metals</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-teal-400 rounded mr-2"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Metalloids</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-blue-400 rounded mr-2"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Nonmetals</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-indigo-400 rounded mr-2"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Halogens</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-purple-400 rounded mr-2"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Noble Gases</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-pink-400 rounded mr-2"></div>
+                  <span className="text-gray-700 dark:text-gray-300">Lanthanides</span>
+                </div>
+              </div>
+            </div>
+
+            {selectedElement && (
+              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                  {selectedElement.name} ({selectedElement.symbol})
+                </h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400">Atomic Number:</span>
+                    <span className="ml-2 font-medium text-gray-800 dark:text-gray-200">
+                      {selectedElement.atomicNumber}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400">Atomic Mass:</span>
+                    <span className="ml-2 font-medium text-gray-800 dark:text-gray-200">
+                      {selectedElement.atomicMass} g/mol
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400">Group:</span>
+                    <span className="ml-2 font-medium text-gray-800 dark:text-gray-200">
+                      {selectedElement.group}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600 dark:text-gray-400">Period:</span>
+                    <span className="ml-2 font-medium text-gray-800 dark:text-gray-200">
+                      {selectedElement.period}
+                    </span>
+                  </div>
+                </div>
+                {getElementDetails(selectedElement.symbol) && (
+                  <div className="mt-3">
+                    <button
+                      onClick={() => {
+                        const details = getElementDetails(selectedElement.symbol);
+                        if (details) {
+                          setElementDetails(details);
+                          setDetailsModalOpen(true);
+                        }
+                      }}
+                      className="inline-flex items-center px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                    >
+                      <Info className="w-4 h-4 mr-1" />
+                      View Detailed Information
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="text-center">
+              <button
+                onClick={onClose}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <ElementDetailsModal
+        element={elementDetails}
+        isOpen={detailsModalOpen}
+        onClose={() => setDetailsModalOpen(false)}
+      />
+    </>
   );
 }

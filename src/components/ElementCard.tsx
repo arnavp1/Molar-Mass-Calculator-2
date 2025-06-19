@@ -1,12 +1,17 @@
 import React from 'react';
+import { Info } from 'lucide-react';
 import { ElementCalculation } from '../utils/molarMassCalculator';
+import { getElementDetails } from '../data/elementDetails';
 
 interface ElementCardProps {
   element: ElementCalculation;
   index: number;
+  onShowDetails?: (symbol: string) => void;
 }
 
-export function ElementCard({ element, index }: ElementCardProps) {
+export function ElementCard({ element, index, onShowDetails }: ElementCardProps) {
+  const hasDetails = getElementDetails(element.element) !== null;
+
   return (
     <div 
       className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/20 dark:border-gray-700/20 hover:shadow-xl transition-all duration-300 hover:scale-105"
@@ -25,8 +30,19 @@ export function ElementCard({ element, index }: ElementCardProps) {
             <p className="text-sm text-gray-600 dark:text-gray-400">Atomic Mass: {element.atomicMass} g/mol</p>
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">×{element.count}</div>
+        <div className="flex items-center space-x-2">
+          <div className="text-right">
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">×{element.count}</div>
+          </div>
+          {hasDetails && onShowDetails && (
+            <button
+              onClick={() => onShowDetails(element.element)}
+              className="p-1 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              title="View detailed element information"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
       

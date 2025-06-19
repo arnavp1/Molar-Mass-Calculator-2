@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Calculator, Beaker as Beaker2, Table } from 'lucide-react';
 import { parseFormula } from '../utils/formulaParser';
 import { calculateMolarMass, MolarMassResult } from '../utils/molarMassCalculator';
+import { getElementDetails } from '../data/elementDetails';
 import { ElementCard } from './ElementCard';
 import { DarkModeToggle } from './DarkModeToggle';
 import { CalculationHistory } from './CalculationHistory';
 import { PeriodicTable } from './PeriodicTable';
 import { UnitConverter } from './UnitConverter';
 import { EnhancedFormulaInput } from './EnhancedFormulaInput';
+import { ElementDetailsModal } from './ElementDetailsModal';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useCalculationHistory } from '../hooks/useCalculationHistory';
 
@@ -16,6 +18,8 @@ export function MolarMassCalculator() {
   const [result, setResult] = useState<MolarMassResult | null>(null);
   const [parseResult, setParseResult] = useState({ elements: [], isValid: false });
   const [isPeriodicTableOpen, setIsPeriodicTableOpen] = useState(false);
+  const [elementDetailsModalOpen, setElementDetailsModalOpen] = useState(false);
+  const [selectedElementDetails, setSelectedElementDetails] = useState(null);
   const { isDark, toggleDarkMode } = useDarkMode();
   const { history, addCalculation, removeEntry, clearHistory } = useCalculationHistory();
 
@@ -47,6 +51,14 @@ export function MolarMassCalculator() {
 
   const handleHistorySelect = (selectedFormula: string) => {
     setFormula(selectedFormula);
+  };
+
+  const handleShowElementDetails = (symbol: string) => {
+    const details = getElementDetails(symbol);
+    if (details) {
+      setSelectedElementDetails(details);
+      setElementDetailsModalOpen(true);
+    }
   };
 
   return (
@@ -103,7 +115,12 @@ export function MolarMassCalculator() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {result.breakdown.map((element, index) => (
-                  <ElementCard key={element.element} element={element} index={index} />
+                  <ElementCard 
+                    key={element.element} 
+                    element={element} 
+                    index={index}
+                    onShowDetails={handleShowElementDetails}
+                  />
                 ))}
               </div>
             </div>
@@ -185,6 +202,13 @@ export function MolarMassCalculator() {
         isOpen={isPeriodicTableOpen}
         onClose={() => setIsPeriodicTableOpen(false)}
         onElementSelect={handleElementSelect}
+      />
+
+      {/* Element Details Modal */}
+      <ElementDetailsModal
+        element={selectedElementDetails}
+        isOpen={elementDetailsModalOpen}
+        onClose={() => setElementDetailsModalOpen(false)}
       />
 
       <style jsx>{`
