@@ -210,8 +210,8 @@ export function PeriodicTable({ isOpen, onClose, onElementSelect }: PeriodicTabl
 
           {/* Legend */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Element Groups</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 text-center">Element Groups</h3>
+            <div className="flex flex-wrap justify-center gap-4 text-sm">
               <div className="flex items-center">
                 <div className="w-4 h-4 bg-red-400 rounded mr-2"></div>
                 <span className="text-gray-700 dark:text-gray-300">Alkali Metals</span>
