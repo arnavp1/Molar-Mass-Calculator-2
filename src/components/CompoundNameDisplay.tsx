@@ -1,6 +1,6 @@
 import React from 'react';
 import { BookOpen, Beaker, Tag, Info } from 'lucide-react';
-import { CompoundInfo } from '../data/compoundNames';
+import { CompoundInfo, compoundDatabase } from '../data/compoundNames';
 
 interface CompoundNameDisplayProps {
   compoundInfo: CompoundInfo | null;
@@ -78,7 +78,7 @@ export function CompoundNameDisplay({ compoundInfo, systematicName, formula }: C
             <div className="flex items-start">
               <Info className="w-5 h-5 text-blue-200 mr-2 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-blue-100">
-                <strong>Generated Name:</strong> This compound is not in our database of {Object.keys(require('../data/compoundNames').compoundDatabase).length}+ compounds. 
+                <strong>Generated Name:</strong> This compound is not in our database of {Object.keys(compoundDatabase).length}+ compounds. 
                 The systematic name follows IUPAC nomenclature rules for binary and simple compounds.
               </div>
             </div>
